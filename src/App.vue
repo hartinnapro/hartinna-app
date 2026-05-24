@@ -1,3 +1,8 @@
+<script setup>
+import { useWakeLock } from '@/composables/useWakeLock'
+useWakeLock()
+</script>
+
 <template>
   <RouterView v-slot="{ Component, route }">
     <Transition name="page" mode="out-in">
