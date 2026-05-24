@@ -34,14 +34,30 @@ html {
   overflow-y: scroll;
   overflow-x: hidden;
   scrollbar-width: none;
-  background: linear-gradient(
-    to bottom,
-    var(--bg) 0%,
-    var(--bg) calc(100% - 90px),
-    #F4C5DA 100%
-  ); /* fills full width beyond the 480px body; bottom fade matches .sqnav gradient */
+  background: var(--bg); /* fills full width beyond the 480px body */
 }
 html::-webkit-scrollbar { display: none; }
+
+/* ─── Bottom-nav background bridge ──────────────────────────────────────────
+   AppNav adds the `has-bottom-nav` class to <html> on mount. On wide windows
+   (Windows PWA primarily) body is only 480px so the .sqnav gradient ends at
+   the body edges. This pseudo-element draws the same gradient full window
+   width, sitting behind everything so the .sqnav gradient in the centre
+   blends seamlessly with the sides. Body is made transparent so the pseudo
+   can show through the 480px centre too. */
+html.has-bottom-nav::after {
+  content: '';
+  position: fixed;
+  bottom: 0;
+  left: 0; right: 0;
+  height: 90px;
+  background: linear-gradient(to bottom, var(--bg) 0%, #F4C5DA 100%);
+  pointer-events: none;
+  z-index: -1;
+}
+html.has-bottom-nav body {
+  background-color: transparent;
+}
 
 body {
   font-family: var(--font-body);

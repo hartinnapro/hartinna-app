@@ -21,7 +21,7 @@
 </template>
 
 <script setup>
-import { computed, h } from 'vue'
+import { computed, h, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 
@@ -30,6 +30,16 @@ const route  = useRoute()
 const cart   = useCartStore()
 
 const cartCount = computed(() => cart.cartCount)
+
+// Toggle the `has-bottom-nav` class on <html> so variables.css can extend
+// the bottom-pink gradient full window width on wide windows (Windows PWA).
+// The CSS lives in src/assets/variables.css.
+onMounted(() => {
+  document.documentElement.classList.add('has-bottom-nav')
+})
+onUnmounted(() => {
+  document.documentElement.classList.remove('has-bottom-nav')
+})
 
 // ── Inline SVG icon components ──────────────────────────────────────────────
 const IconHome = { render: () => h('svg', { width: 26, height: 26, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.8, viewBox: '0 0 24 24' },
