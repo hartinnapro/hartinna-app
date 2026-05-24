@@ -11,7 +11,7 @@
   --accent:        #C9956A;
   --text:          #2C1810;
   --text-muted:    #9A7B77;
-  --border:        #E8D8D4;
+  --border:        #F0D6E4;
   --error:         #C0392B;
   --error-light:   #FEF0EE;
   --success:       #2E7D52;
@@ -52,7 +52,7 @@ body {
 
 /* ─── Skeleton loading ───────────────────────────────────────────────────── */
 .sk {
-  background: linear-gradient(90deg, #f0e8e4 25%, #e8dcd8 50%, #f0e8e4 75%);
+  background: linear-gradient(90deg, #F5E2EC 25%, #ECD3DE 50%, #F5E2EC 75%);
   background-size: 200% 100%;
   animation: sk-shimmer 1.3s infinite;
   border-radius: 6px;

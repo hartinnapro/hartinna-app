@@ -8,7 +8,7 @@
         <div class="sk" style="width:40px;height:36px;border-radius:8px;"></div>
       </div>
       <div class="sk-main" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div v-for="i in 6" :key="i" style="background:#fff;border-radius:14px;border:1px solid #e8d8d4;padding:12px;overflow:hidden;">
+        <div v-for="i in 6" :key="i" style="background:#fff;border-radius:14px;border:1px solid var(--border);padding:12px;overflow:hidden;">
           <div class="sk" style="width:100%;height:110px;border-radius:10px;margin-bottom:10px;"></div>
           <div class="sk" style="width:50%;height:11px;margin-bottom:6px;"></div>
           <div class="sk" style="width:80%;height:13px;margin-bottom:8px;"></div>

@@ -10,7 +10,7 @@
         <div class="sk" style="width:36px;height:28px;border-radius:20px;" v-for="i in 5" :key="i"></div>
       </div>
       <div class="sk-main">
-        <div v-for="i in 4" :key="i" style="background:#fff;border-radius:14px;border:1px solid #e8d8d4;padding:14px 16px;margin-bottom:10px;">
+        <div v-for="i in 4" :key="i" style="background:#fff;border-radius:14px;border:1px solid var(--border);padding:14px 16px;margin-bottom:10px;">
           <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
             <div><div class="sk" style="width:100px;height:14px;margin-bottom:6px;"></div><div class="sk" style="width:80px;height:11px;"></div></div>
             <div class="sk" style="width:80px;height:24px;border-radius:20px;"></div>
@@ -19,7 +19,7 @@
             <div class="sk" style="width:80px;height:22px;border-radius:20px;"></div>
             <div class="sk" style="width:60px;height:22px;border-radius:20px;"></div>
           </div>
-          <div style="border-top:1px solid #e8d8d4;padding-top:10px;display:flex;justify-content:space-between;">
+          <div style="border-top:1px solid var(--border);padding-top:10px;display:flex;justify-content:space-between;">
             <div class="sk" style="width:80px;height:18px;"></div>
             <div class="sk" style="width:16px;height:16px;border-radius:50%;"></div>
           </div>
