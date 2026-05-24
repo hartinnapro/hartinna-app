@@ -61,6 +61,7 @@
           <div
             class="product-card"
             :class="{ focused: focusedId === p.id }"
+            :data-product-id="p.id"
             v-for="(p, idx) in products"
             :key="p.id"
             :style="{ animationDelay: (idx * 0.06) + 's' }"
@@ -110,7 +111,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import { guardedSession } from '@/lib/session'
@@ -125,7 +126,21 @@ const products = ref([])
 const focusedId = ref(null)
 
 function toggleFocus(p) {
-  focusedId.value = focusedId.value === p.id ? null : p.id
+  const wasFocused = focusedId.value === p.id
+  focusedId.value = wasFocused ? null : p.id
+
+  // When newly focused, scroll the card to the top of the viewport so the
+  // enlarged (scale 1.3) version has room to grow downward without clipping.
+  // 16px buffer below the page top so the card doesn't sit flush against
+  // the very top edge.
+  if (!wasFocused) {
+    nextTick(() => {
+      const el = document.querySelector(`[data-product-id="${p.id}"]`)
+      if (!el) return
+      const targetY = el.getBoundingClientRect().top + window.scrollY - 16
+      window.scrollTo({ top: targetY, behavior: 'smooth' })
+    })
+  }
 }
 
 function handleOutsideClick(e) {
