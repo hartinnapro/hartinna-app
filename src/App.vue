@@ -11,7 +11,7 @@ const route = useRoute()
 // Pages that show the bottom navigation. Listed centrally so AppNav can be
 // rendered ONCE in App.vue (persistent across navigation) instead of inside
 // each view — prevents nav flicker/jump during page transitions.
-const NAV_PATHS = ['/home', '/cart', '/orders', '/profile']
+const NAV_PATHS = ['/home', '/cart', '/orders', '/profile', '/payment']
 const showNav = computed(() =>
   NAV_PATHS.some(p => route.path === p || route.path.startsWith(p + '/'))
 )
