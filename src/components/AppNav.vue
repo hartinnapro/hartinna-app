@@ -70,11 +70,12 @@ function navigate(item) {
 <style scoped>
 .sqnav {
   position: fixed;
-  bottom: 16px;
+  bottom: 0;
   left: 50%; transform: translateX(-50%);
   width: 100%; max-width: 480px;
   display: flex; align-items: flex-end; gap: 5px;
-  padding: 0 30px;
+  padding: 0 30px 16px;
+  background: linear-gradient(to bottom, #FDF0F5 0%, #F4C5DA 100%);
   z-index: 99;
   pointer-events: none;
 }
