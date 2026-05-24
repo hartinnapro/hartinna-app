@@ -37,7 +37,7 @@
         <!-- Amount -->
         <div class="amount-card">
           <div class="amount-label">Amount to Transfer</div>
-          <div class="amount-value">MYR {{ draft ? draft.total.toFixed(2) : '0.00' }}</div>
+          <div class="amount-value">{{ draft ? formatRM(draft.total) : 'RM 0.00' }}</div>
           <div class="amount-items" v-if="draft">{{ draft.items.length }} item{{ draft.items.length > 1 ? 's' : '' }} · {{ pickupLabel }}</div>
         </div>
 
@@ -143,6 +143,14 @@ const pickupLabel = computed(() => {
   if (!draft.value) return ''
   return draft.value.pickup === 'delivery' ? 'Delivery' : 'Self Pickup'
 })
+
+// Format: RM 1,234.50 (Malaysian local style)
+function formatRM(amount) {
+  const num = Number(amount || 0).toFixed(2)
+  const [intPart, decPart] = num.split('.')
+  const withCommas = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  return `RM ${withCommas}.${decPart}`
+}
 
 function onFileSelect(e) { const f = e.target.files[0]; if (f) handleFile(f) }
 function onDrop(e) { dragOver.value = false; const f = e.dataTransfer.files[0]; if (f) handleFile(f) }
