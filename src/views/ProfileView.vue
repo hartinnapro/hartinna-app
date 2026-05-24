@@ -221,7 +221,13 @@ onMounted(async () => {
   }
 
   const { data: avatarData } = supabase.storage.from('member-avatars').getPublicUrl(`${uid}/avatar.jpg`)
-  avatarUrl.value = avatarData.publicUrl + '?t=' + Date.now()
+  const candidateUrl = avatarData.publicUrl + '?t=' + Date.now()
+  try {
+    const res = await fetch(candidateUrl, { method: 'HEAD' })
+    if (res.ok && res.headers.get('content-type')?.startsWith('image/')) {
+      avatarUrl.value = candidateUrl
+    }
+  } catch { /* leave null, fallback shows */ }
 
   const [{ data:m }, { data:orderData }] = await Promise.all([
     supabase.from('members').select('full_name,phone,region,level').eq('id',uid).single(),
