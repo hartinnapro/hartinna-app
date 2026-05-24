@@ -337,9 +337,12 @@ onMounted(async () => {
   position: absolute;
   top: 4px; bottom: 4px; left: 4px;
   width: calc(50% - 4px);
-  background: var(--card);
+  background: linear-gradient(135deg, var(--primary) 0%, #E0408A 100%);
   border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(44,24,16,0.08);
+  /* Two-layer pink glow: tight inner + soft outer halo */
+  box-shadow:
+    0 2px 6px  rgba(212,39,108,0.30),
+    0 6px 20px rgba(212,39,108,0.38);
   transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 0;
 }
@@ -356,7 +359,7 @@ onMounted(async () => {
   -webkit-tap-highlight-color: transparent;
   -webkit-user-select: none; user-select: none;
 }
-.seg-option.active { color: var(--primary); }
+.seg-option.active { color: white; }
 
 /* ── Form controls ──────────────────────────────────────────────────────── */
 .form-group { margin-bottom: 14px; }
