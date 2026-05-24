@@ -87,26 +87,26 @@
         <!-- Delivery fields -->
         <template v-if="pickup === 'delivery'">
           <div class="form-group">
-            <label>Recipient Name</label>
-            <input v-model="delivery.name" type="text" placeholder="Full name" :class="{ err: errors.name }" />
+            <label for="cart-recipient-name">Recipient Name</label>
+            <input id="cart-recipient-name" name="recipient-name" autocomplete="name" v-model="delivery.name" type="text" placeholder="Full name" :class="{ err: errors.name }" />
             <div v-if="errors.name" class="field-error">{{ errors.name }}</div>
           </div>
           <div class="form-group">
-            <label>Recipient Phone</label>
-            <input v-model="delivery.phone" type="tel" placeholder="+60123456789" :class="{ err: errors.phone }" />
+            <label for="cart-recipient-phone">Recipient Phone</label>
+            <input id="cart-recipient-phone" name="recipient-phone" autocomplete="tel" v-model="delivery.phone" type="tel" placeholder="+60123456789" :class="{ err: errors.phone }" />
             <div v-if="errors.phone" class="field-error">{{ errors.phone }}</div>
           </div>
           <div class="form-group">
-            <label>Delivery Address</label>
-            <textarea v-model="delivery.address" placeholder="Full address including postcode and state" :class="{ err: errors.address }"></textarea>
+            <label for="cart-delivery-address">Delivery Address</label>
+            <textarea id="cart-delivery-address" name="delivery-address" autocomplete="street-address" v-model="delivery.address" placeholder="Full address including postcode and state" :class="{ err: errors.address }"></textarea>
             <div v-if="errors.address" class="field-error">{{ errors.address }}</div>
           </div>
         </template>
 
         <!-- Remarks -->
         <div class="form-group">
-          <label>Remarks <span class="opt">(optional)</span></label>
-          <textarea v-model="remarks" placeholder="Any special instructions or notes…" style="min-height:60px;"></textarea>
+          <label for="cart-remarks">Remarks <span class="opt">(optional)</span></label>
+          <textarea id="cart-remarks" name="remarks" v-model="remarks" placeholder="Any special instructions or notes…" style="min-height:60px;"></textarea>
         </div>
 
         <div class="divider"></div>
