@@ -104,7 +104,6 @@
     <!-- Toast -->
     <div :class="['toast', toast.visible ? '' : 'hide']" aria-live="polite">{{ toast.msg }}</div>
 
-    <AppNav />
   </div>
 </template>
 
@@ -115,8 +114,6 @@ import { supabase } from '@/lib/supabase'
 import { guardedSession } from '@/lib/session'
 import { hppGetCache, hppSetCache } from '@/lib/cache'
 import { useCartStore } from '@/stores/cart'
-import AppNav from '@/components/AppNav.vue'
-
 const router = useRouter()
 const cart   = useCartStore()
 

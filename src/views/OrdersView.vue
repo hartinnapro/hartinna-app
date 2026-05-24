@@ -85,7 +85,6 @@
       </main>
     </template>
 
-    <AppNav />
   </div>
 </template>
 
@@ -95,8 +94,6 @@ import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import { guardedSession } from '@/lib/session'
 import { hppGetCache, hppSetCache } from '@/lib/cache'
-import AppNav from '@/components/AppNav.vue'
-
 const router = useRouter()
 const state  = ref('loading')
 const orders = ref([])

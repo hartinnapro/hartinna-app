@@ -135,7 +135,6 @@
       </template>
     </main>
 
-    <AppNav />
   </div>
 </template>
 
@@ -144,8 +143,6 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { guardedSession } from '@/lib/session'
 import { useCartStore } from '@/stores/cart'
-import AppNav from '@/components/AppNav.vue'
-
 const router = useRouter()
 const cart   = useCartStore()
 
