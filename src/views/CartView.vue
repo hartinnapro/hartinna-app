@@ -337,14 +337,38 @@ onMounted(async () => {
   position: absolute;
   top: 4px; bottom: 4px; left: 4px;
   width: calc(50% - 4px);
-  background: linear-gradient(135deg, var(--primary) 0%, #E0408A 100%);
+  background-color: var(--primary);
+  /* Four radial layers of pink at varied positions create the "fog";
+     the over-sized background (220%) lets background-position animate the
+     fog slowly across the pill without revealing edges. */
+  background-image:
+    radial-gradient(ellipse at 20% 20%, rgba(255,210,235,0.42) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 80%, rgba(184,31,90,0.55)   0%, transparent 55%),
+    radial-gradient(ellipse at 70% 30%, rgba(232,160,200,0.30) 0%, transparent 45%),
+    radial-gradient(ellipse at 30% 70%, rgba(212,39,108,0.50)  0%, transparent 50%);
+  background-size: 220% 220%;
   border-radius: 6px;
-  /* Two-layer pink glow: tight inner + soft outer halo */
+  /* Two-layer pink glow + subtle inner top highlight */
   box-shadow:
     0 2px 6px  rgba(212,39,108,0.30),
-    0 6px 20px rgba(212,39,108,0.38);
+    0 6px 20px rgba(212,39,108,0.38),
+    inset 0 1px 0 rgba(255,255,255,0.18);
   transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 0;
+  animation: pill-fog 8s ease-in-out infinite;
+}
+
+@keyframes pill-fog {
+  0%   { background-position:   0% 50%; }
+  25%  { background-position: 100%  0%; }
+  50%  { background-position: 100% 100%; }
+  75%  { background-position:   0% 100%; }
+  100% { background-position:   0% 50%; }
+}
+
+/* Respect users who request less motion */
+@media (prefers-reduced-motion: reduce) {
+  .seg-indicator { animation: none; }
 }
 .seg-track[data-pickup="self_pickup"] .seg-indicator { transform: translateX(0); }
 .seg-track[data-pickup="delivery"]    .seg-indicator { transform: translateX(100%); }
