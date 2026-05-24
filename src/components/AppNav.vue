@@ -68,6 +68,7 @@ function navigate(item) {
 </script>
 
 <style scoped>
+/* Shared transition curve for every state change in the nav (Material standard) */
 .sqnav {
   position: fixed;
   bottom: 0;
@@ -86,11 +87,16 @@ function navigate(item) {
   pointer-events: all;
   cursor: pointer;
   transform-origin: bottom center;
-  transition: transform 0.28s cubic-bezier(0.34,1.46,0.64,1), opacity 0.22s ease;
+  transition:
+    transform 0.24s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity   0.24s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
 }
-.sqn-item.idle   { transform: scale(0.88); opacity: 0.72; }
-.sqn-item.active { transform: scale(1.05); }
+.sqn-item.idle   { transform: scale(0.94); opacity: 0.72; }
+.sqn-item.active { transform: scale(1.0); }
 
 .sqn-squircle {
   width: 70%; aspect-ratio: 1;
@@ -100,7 +106,10 @@ function navigate(item) {
   display: flex; flex-direction: column;
   align-items: center; justify-content: center; gap: 3px;
   box-shadow: 0 3px 10px rgba(212,39,108,0.10), 0 1px 3px rgba(0,0,0,0.05);
-  transition: background 0.22s, border-color 0.22s, box-shadow 0.22s;
+  transition:
+    background   0.24s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.24s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow   0.24s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 }
 
@@ -110,13 +119,18 @@ function navigate(item) {
   box-shadow: 0 6px 18px rgba(212,39,108,0.35), 0 2px 6px rgba(212,39,108,0.20);
 }
 
-.sqn-squircle svg { color: var(--primary); transition: color 0.22s; pointer-events: none; }
+.sqn-squircle svg {
+  color: var(--primary);
+  transition: color 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
 .sqn-item.active .sqn-squircle svg { color: #fff; }
 
 .sqn-label {
   font-size: 11px; font-weight: 600;
   color: var(--primary); letter-spacing: 0.01em;
-  transition: color 0.22s; pointer-events: none;
+  transition: color 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
   line-height: 1;
 }
 .sqn-item.active .sqn-label { color: #fff; }
@@ -130,6 +144,10 @@ function navigate(item) {
   display: flex; align-items: center; justify-content: center;
   border: 2px solid #fff;
   line-height: 1;
+  transition:
+    background   0.24s cubic-bezier(0.4, 0, 0.2, 1),
+    color        0.24s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.24s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .sqn-item.active .sqn-badge { background: white; color: var(--primary); border-color: var(--primary); }
 </style>
