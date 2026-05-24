@@ -295,7 +295,7 @@ onUnmounted(() => {
 .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
 .product-card {
-  animation: reveal 0.30s ease both;
+  animation: reveal 0.30s ease backwards;
   background: var(--card);
   border-radius: var(--radius);
   border: 1px solid rgba(232,216,212,0.6);
