@@ -60,9 +60,11 @@
         <div class="product-grid" v-else>
           <div
             class="product-card"
+            :class="{ focused: focusedId === p.id, dimmed: focusedId !== null && focusedId !== p.id }"
             v-for="(p, idx) in products"
             :key="p.id"
             :style="{ animationDelay: (idx * 0.06) + 's' }"
+            @click="toggleFocus(p)"
           >
             <div class="product-img">
               <img v-if="p.image_url" :src="p.image_url" :alt="p.name" loading="lazy" />
@@ -83,7 +85,7 @@
               </div>
             </div>
 
-            <div class="product-footer">
+            <div class="product-footer" @click.stop>
               <div class="qty-stepper">
                 <button class="qty-btn" @click="decQty(p)" :disabled="localQty(p.id) <= 0">−</button>
                 <div class="qty-val">{{ localQty(p.id) }}</div>
@@ -108,7 +110,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import { guardedSession } from '@/lib/session'
@@ -120,6 +122,17 @@ const cart   = useCartStore()
 const state   = ref('loading')
 const member  = reactive({ full_name: '', level: '' })
 const products = ref([])
+const focusedId = ref(null)
+
+function toggleFocus(p) {
+  focusedId.value = focusedId.value === p.id ? null : p.id
+}
+
+function handleOutsideClick(e) {
+  if (focusedId.value && !e.target.closest('.product-card')) {
+    focusedId.value = null
+  }
+}
 const localQtys = reactive({}) // stepper values not yet committed to cart
 const toast   = reactive({ msg: '', visible: false })
 let toastTimer = null
@@ -210,6 +223,14 @@ onMounted(async () => {
 
   if (!cached) state.value = 'ready'
 })
+
+onMounted(() => {
+  document.addEventListener('click', handleOutsideClick)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleOutsideClick)
+})
 </script>
 
 <style scoped>
@@ -281,10 +302,42 @@ onMounted(async () => {
   overflow: hidden;
   box-shadow: 0 2px 10px rgba(44,24,16,0.06);
   display: flex; flex-direction: column;
-  transition: transform 0.15s, box-shadow 0.15s;
-  cursor: default;
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.28s ease,
+    opacity 0.22s ease,
+    filter 0.22s ease;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
 }
-.product-card:active { transform: scale(0.98); }
+
+/* Focused — lifted hero state */
+.product-card.focused {
+  transform: scale(1.05);
+  box-shadow:
+    0 16px 40px rgba(212,39,108,0.18),
+    0 4px 14px rgba(44,24,16,0.10);
+  z-index: 5;
+}
+
+/* Dimmed siblings — pushed back */
+.product-card.dimmed {
+  transform: scale(0.96);
+  opacity: 0.42;
+  filter: blur(1px);
+}
+
+/* Bigger interactive controls on focused card */
+.product-card.focused .qty-btn {
+  width: 34px; height: 34px; font-size: 18px;
+}
+.product-card.focused .qty-val {
+  width: 36px; line-height: 34px; font-size: 14px;
+}
+.product-card.focused .btn-add {
+  padding: 10px 16px; font-size: 13px;
+}
 
 .product-img {
   aspect-ratio: 1; position: relative;
@@ -329,7 +382,7 @@ onMounted(async () => {
   width: 28px; height: 28px; background: none; border: none;
   cursor: pointer; font-size: 16px; color: var(--primary);
   display: flex; align-items: center; justify-content: center;
-  transition: background 0.12s; flex-shrink: 0;
+  transition: background 0.12s, width 0.22s, height 0.22s, font-size 0.22s; flex-shrink: 0;
 }
 .qty-btn:hover { background: var(--primary-light); }
 .qty-btn:disabled { color: var(--border); cursor: not-allowed; }
@@ -346,7 +399,7 @@ onMounted(async () => {
   background: var(--primary); color: white;
   border: none; border-radius: var(--radius-xs);
   font-family: var(--font-body); font-size: 12px; font-weight: 600;
-  cursor: pointer; transition: background 0.15s, opacity 0.15s;
+  cursor: pointer; transition: background 0.15s, opacity 0.15s, padding 0.22s, font-size 0.22s;
   white-space: nowrap;
 }
 .btn-add:hover { opacity: 0.88; }
