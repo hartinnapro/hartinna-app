@@ -34,7 +34,12 @@ html {
   overflow-y: scroll;
   overflow-x: hidden;
   scrollbar-width: none;
-  background: var(--bg); /* fills full width beyond the 480px body */
+  background: linear-gradient(
+    to bottom,
+    var(--bg) 0%,
+    var(--bg) calc(100% - 90px),
+    #F4C5DA 100%
+  ); /* fills full width beyond the 480px body; bottom fade matches .sqnav gradient */
 }
 html::-webkit-scrollbar { display: none; }
 
