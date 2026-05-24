@@ -60,7 +60,7 @@
         <div class="product-grid" v-else>
           <div
             class="product-card"
-            :class="{ focused: focusedId === p.id, dimmed: focusedId !== null && focusedId !== p.id }"
+            :class="{ focused: focusedId === p.id }"
             v-for="(p, idx) in products"
             :key="p.id"
             :style="{ animationDelay: (idx * 0.06) + 's' }"
@@ -321,12 +321,6 @@ onUnmounted(() => {
   z-index: 5;
 }
 
-/* Dimmed siblings — pushed back */
-.product-card.dimmed {
-  transform: scale(0.96);
-  opacity: 0.42;
-  filter: blur(1px);
-}
 
 /* Bigger interactive controls on focused card */
 .product-card.focused .qty-btn {
