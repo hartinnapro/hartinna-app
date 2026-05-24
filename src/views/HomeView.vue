@@ -314,23 +314,11 @@ onUnmounted(() => {
 
 /* Focused — lifted hero state */
 .product-card.focused {
-  transform: scale(1.05);
+  transform: scale(1.3);
   box-shadow:
-    0 16px 40px rgba(212,39,108,0.18),
-    0 4px 14px rgba(44,24,16,0.10);
+    0 24px 60px rgba(212,39,108,0.22),
+    0 8px 20px rgba(44,24,16,0.14);
   z-index: 5;
-}
-
-
-/* Bigger interactive controls on focused card */
-.product-card.focused .qty-btn {
-  width: 34px; height: 34px; font-size: 18px;
-}
-.product-card.focused .qty-val {
-  width: 36px; line-height: 34px; font-size: 14px;
-}
-.product-card.focused .btn-add {
-  padding: 10px 16px; font-size: 13px;
 }
 
 .product-img {
@@ -376,7 +364,7 @@ onUnmounted(() => {
   width: 28px; height: 28px; background: none; border: none;
   cursor: pointer; font-size: 16px; color: var(--primary);
   display: flex; align-items: center; justify-content: center;
-  transition: background 0.12s, width 0.22s, height 0.22s, font-size 0.22s; flex-shrink: 0;
+  transition: background 0.12s; flex-shrink: 0;
 }
 .qty-btn:hover { background: var(--primary-light); }
 .qty-btn:disabled { color: var(--border); cursor: not-allowed; }
@@ -393,7 +381,7 @@ onUnmounted(() => {
   background: var(--primary); color: white;
   border: none; border-radius: var(--radius-xs);
   font-family: var(--font-body); font-size: 12px; font-weight: 600;
-  cursor: pointer; transition: background 0.15s, opacity 0.15s, padding 0.22s, font-size 0.22s;
+  cursor: pointer; transition: background 0.15s, opacity 0.15s;
   white-space: nowrap;
 }
 .btn-add:hover { opacity: 0.88; }
