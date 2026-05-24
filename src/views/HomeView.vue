@@ -313,6 +313,12 @@ onUnmounted(() => {
 }
 
 /* Focused — lifted hero state */
+/* Anchor scale to the OUTER corner of each card so the enlargement grows
+   inward (toward the grid centre) and downward, never off-screen or into
+   the header above. */
+.product-card:nth-child(odd)  { transform-origin: top left;  }  /* left column  */
+.product-card:nth-child(even) { transform-origin: top right; }  /* right column */
+
 .product-card.focused {
   transform: scale(1.3);
   box-shadow:
