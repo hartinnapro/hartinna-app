@@ -2,7 +2,7 @@
    Imported in main.js. Do NOT redefine :root in any scoped component style.
    ─────────────────────────────────────────────────────────────────────────── */
 :root {
-  --bg:            #FBF6F0;
+  --bg:            #FDF0F5;
   --card:          #FFFFFF;
   --primary:       #D4276C;
   --primary-dark:  #B81F5A;
