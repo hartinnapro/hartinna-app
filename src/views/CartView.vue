@@ -1,17 +1,5 @@
 <template>
   <div>
-    <header class="header">
-      <button class="back-btn" @click="router.push('/home')" aria-label="Back">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path d="M19 12H5M12 19l-7-7 7-7"/>
-        </svg>
-      </button>
-      <div class="header-title">My Cart</div>
-      <div class="header-count" v-if="cartList.length">
-        {{ cartList.length }} item{{ cartList.length > 1 ? 's' : '' }}
-      </div>
-    </header>
-
     <main class="main">
       <!-- Empty state -->
       <div v-if="cartList.length === 0" class="empty">
@@ -26,10 +14,19 @@
 
       <template v-else>
         <!-- Items -->
-        <div class="section-label">Order Items</div>
+        <div class="section-header">
+          <div class="section-label">Your Items</div>
+          <div class="section-count">
+            {{ cartList.length }} item{{ cartList.length > 1 ? 's' : '' }}
+          </div>
+        </div>
 
         <div class="cart-item" v-for="item in cartList" :key="item.product.id">
-          <div class="item-img">
+          <div
+            class="item-img"
+            :class="{ expanded: expandedPhotoId === item.product.id }"
+            @click.stop="togglePhoto(item)"
+          >
             <img v-if="item.product.image_url" :src="item.product.image_url" :alt="item.product.name" />
             <span v-else>{{ item.product.name[0] }}</span>
           </div>
@@ -148,7 +145,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { guardedSession } from '@/lib/session'
 import { useCartStore } from '@/stores/cart'
@@ -172,6 +169,20 @@ const alertMsg = ref('')
 // Remove confirmation state
 const showRemoveModal   = ref(false)
 const pendingRemoveItem = ref(null)
+
+// Photo-expand state (tap a product photo to overlay-zoom it)
+const expandedPhotoId = ref(null)
+
+function togglePhoto(item) {
+  expandedPhotoId.value = expandedPhotoId.value === item.product.id ? null : item.product.id
+}
+
+function handlePhotoOutsideClick(e) {
+  if (!expandedPhotoId.value) return
+  if (!e.target.closest('.item-img.expanded')) {
+    expandedPhotoId.value = null
+  }
+}
 
 const cartList   = computed(() => cart.cartList)
 const grandTotal = computed(() => cart.grandTotal)
@@ -254,6 +265,11 @@ onMounted(async () => {
   const session = await guardedSession()
   if (!session) { router.push('/login'); return }
   cart.load()
+  document.addEventListener('click', handlePhotoOutsideClick)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handlePhotoOutsideClick)
 })
 </script>
 
@@ -293,26 +309,59 @@ onMounted(async () => {
   0%, 30%   { background-position: 200% 0; }
   70%, 100% { background-position: -100% 0; }
 }
+
+/* ─── Animation usage rules — kept non-scoped too. Vue's scoped CSS hashes
+       the animation property's keyframes-name reference and can desync from
+       the keyframes definition. Both sides global = guaranteed link. ─── */
+.seg-indicator {
+  animation:
+    pill-fog   8s ease-in-out infinite,
+    pill-pulse 3s ease-in-out infinite;
+  will-change: transform, box-shadow, background-position;
+}
+
+.seg-indicator::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    115deg,
+    transparent 38%,
+    rgba(255,255,255,0.70) 50%,
+    transparent 62%
+  );
+  background-size: 220% 100%;
+  background-repeat: no-repeat;
+  background-position: 200% 0;
+  animation: pill-shimmer 3.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Respect users who request less motion */
+@media (prefers-reduced-motion: reduce) {
+  .seg-indicator,
+  .seg-indicator::before { animation: none; }
+}
 </style>
 
 <style scoped>
-.header {
-  position: sticky; top: 0; z-index: 100; height: var(--header-h);
-  background: var(--card); border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; padding: 0 16px; gap: 12px;
-  box-shadow: 0 2px 12px rgba(44,24,16,0.06);
-}
-.back-btn {
-  width: 36px; height: 36px; background: none;
-  border: 1.5px solid var(--border); border-radius: var(--radius-xs);
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  color: var(--text-muted); flex-shrink: 0; transition: border-color 0.15s, color 0.15s;
-}
-.back-btn:hover { border-color: var(--primary); color: var(--primary); }
-.header-title { flex: 1; font-family: var(--font-display); font-size: 18px; color: var(--text); }
-.header-count { font-size: 12px; color: var(--text-muted); }
+/* No top header — page starts directly with content.
+   Top padding adapts to safe-area-inset-top for iOS PWA notch. */
+.main { padding: max(20px, env(safe-area-inset-top, 0px)) 16px 120px; }
 
-.main { padding: 16px 16px 120px; }
+/* Section header: label on left, count on right, on a single row */
+.section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.section-count {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
 
 .empty { text-align: center; padding: 60px 24px; color: var(--text-muted); }
 .empty svg { opacity: 0.2; margin-bottom: 14px; display: block; margin-left: auto; margin-right: auto; }
@@ -328,7 +377,7 @@ onMounted(async () => {
 
 .section-label {
   font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
-  text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;
+  text-transform: uppercase; color: var(--text-muted);
 }
 
 /* ── Cart items ─────────────────────────────────────────────────────────── */
@@ -344,6 +393,25 @@ onMounted(async () => {
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   font-family: var(--font-display); font-size: 20px; color: var(--primary);
   overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  transform-origin: left center;
+  transition:
+    transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Expanded photo: 2x scale, anchored to left edge so it grows right + down,
+   never crashes the left viewport border. Floats above neighbours via z-index
+   + soft drop shadow. */
+.item-img.expanded {
+  transform: scale(2);
+  z-index: 10;
+  box-shadow:
+    0 12px 32px rgba(44,24,16,0.22),
+    0 4px 12px  rgba(44,24,16,0.10);
 }
 .item-img img { width: 100%; height: 100%; object-fit: cover; }
 .item-info { flex: 1; min-width: 0; }
@@ -394,38 +462,11 @@ onMounted(async () => {
     inset 0 1px 0 rgba(255,255,255,0.18);
   transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 0;
-  will-change: transform, box-shadow, background-position;
-  /* Three parallel animations: fog drift, glow breathing, shimmer sweep.
-     Different periods (8s / 3s / 3.5s) so they never sync into a marching beat. */
-  animation:
-    pill-fog   8s ease-in-out infinite,
-    pill-pulse 3s ease-in-out infinite;
+  /* Animation declared in the non-scoped <style> block above so Vue's scoped
+     CSS doesn't hash the keyframes-name reference out of existence. */
 }
 
-/* Diagonal shimmer streak across the pill — periodic sweep with rest */
-.seg-indicator::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(
-    115deg,
-    transparent 38%,
-    rgba(255,255,255,0.70) 50%,
-    transparent 62%
-  );
-  background-size: 220% 100%;
-  background-repeat: no-repeat;
-  background-position: 200% 0;
-  animation: pill-shimmer 3.5s ease-in-out infinite;
-  pointer-events: none;
-}
 
-/* Respect users who request less motion — disable all three animations */
-@media (prefers-reduced-motion: reduce) {
-  .seg-indicator,
-  .seg-indicator::before { animation: none; }
-}
 .seg-track[data-pickup="self_pickup"] .seg-indicator { transform: translateX(0); }
 .seg-track[data-pickup="delivery"]    .seg-indicator { transform: translateX(100%); }
 .seg-option {
