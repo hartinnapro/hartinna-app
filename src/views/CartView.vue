@@ -257,6 +257,44 @@ onMounted(async () => {
 })
 </script>
 
+<style>
+/* ─── Pickup-pill animations — defined non-scoped so the keyframe names and
+       the `animation:` references in <style scoped> below resolve to the same
+       global identifiers. Vue's scoped-CSS hashing can otherwise desync the
+       two on comma-separated multi-animation shorthand. ─── */
+
+/* Foggy pink drift across the pill */
+@keyframes pill-fog {
+  0%   { background-position:   0% 50%; }
+  25%  { background-position: 100%  0%; }
+  50%  { background-position: 100% 100%; }
+  75%  { background-position:   0% 100%; }
+  100% { background-position:   0% 50%; }
+}
+
+/* Breathing glow: outer halo grows and softens visibly */
+@keyframes pill-pulse {
+  0%, 100% {
+    box-shadow:
+      0 2px 6px   rgba(212,39,108,0.28),
+      0 4px 14px  rgba(212,39,108,0.30),
+      inset 0 1px 0 rgba(255,255,255,0.18);
+  }
+  50% {
+    box-shadow:
+      0 4px 14px  rgba(212,39,108,0.50),
+      0 14px 38px rgba(212,39,108,0.70),
+      inset 0 1px 0 rgba(255,255,255,0.18);
+  }
+}
+
+/* Shimmer sweep: streak parked off-screen, sweeps across, parks again */
+@keyframes pill-shimmer {
+  0%, 30%   { background-position: 200% 0; }
+  70%, 100% { background-position: -100% 0; }
+}
+</style>
+
 <style scoped>
 .header {
   position: sticky; top: 0; z-index: 100; height: var(--header-h);
@@ -356,8 +394,9 @@ onMounted(async () => {
     inset 0 1px 0 rgba(255,255,255,0.18);
   transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 0;
+  will-change: transform, box-shadow, background-position;
   /* Three parallel animations: fog drift, glow breathing, shimmer sweep.
-     Different periods (8s / 3s / 4s) so they never sync into a marching beat. */
+     Different periods (8s / 3s / 3.5s) so they never sync into a marching beat. */
   animation:
     pill-fog   8s ease-in-out infinite,
     pill-pulse 3s ease-in-out infinite;
@@ -371,47 +410,15 @@ onMounted(async () => {
   border-radius: inherit;
   background: linear-gradient(
     115deg,
-    transparent 42%,
-    rgba(255,255,255,0.45) 50%,
-    transparent 58%
+    transparent 38%,
+    rgba(255,255,255,0.70) 50%,
+    transparent 62%
   );
   background-size: 220% 100%;
   background-repeat: no-repeat;
   background-position: 200% 0;
-  animation: pill-shimmer 4s ease-in-out infinite;
+  animation: pill-shimmer 3.5s ease-in-out infinite;
   pointer-events: none;
-}
-
-@keyframes pill-fog {
-  0%   { background-position:   0% 50%; }
-  25%  { background-position: 100%  0%; }
-  50%  { background-position: 100% 100%; }
-  75%  { background-position:   0% 100%; }
-  100% { background-position:   0% 50%; }
-}
-
-/* Breathing glow: outer halo intensifies and softens */
-@keyframes pill-pulse {
-  0%, 100% {
-    box-shadow:
-      0 2px 6px  rgba(212,39,108,0.30),
-      0 6px 20px rgba(212,39,108,0.38),
-      inset 0 1px 0 rgba(255,255,255,0.18);
-  }
-  50% {
-    box-shadow:
-      0 3px 10px rgba(212,39,108,0.42),
-      0 10px 28px rgba(212,39,108,0.55),
-      inset 0 1px 0 rgba(255,255,255,0.18);
-  }
-}
-
-/* Shimmer sweep: streak parked off-screen-right for 1.6s, then sweeps across
-   in 1.6s, then parked off-screen-left for 0.8s before loop. Loop boundary
-   jump (-100% → 200%) is invisible since both positions are off-screen. */
-@keyframes pill-shimmer {
-  0%, 40%  { background-position: 200% 0; }
-  80%, 100% { background-position: -100% 0; }
 }
 
 /* Respect users who request less motion — disable all three animations */
