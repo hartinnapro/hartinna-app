@@ -65,10 +65,9 @@
             @click="pickup = 'self_pickup'"
           >
             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-              <path d="M9 3 V10"/>
-              <path d="M15 3 V10"/>
-              <rect x="5" y="10" width="14" height="11" rx="1"/>
-              <line x1="5" y1="14" x2="19" y2="14"/>
+              <path d="M4 8 L6 4 H18 L20 8 Z"/>
+              <path d="M4 8 V20 H20 V8"/>
+              <path d="M10 20 V14 H14 V20"/>
             </svg>
             <span>Self Pickup</span>
           </button>
