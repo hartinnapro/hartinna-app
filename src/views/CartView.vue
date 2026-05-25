@@ -64,9 +64,11 @@
             :class="{ active: pickup === 'self_pickup' }"
             @click="pickup = 'self_pickup'"
           >
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-              <polyline points="9 22 9 12 15 12 15 22"/>
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+              <path d="M9 3 V10"/>
+              <path d="M15 3 V10"/>
+              <rect x="5" y="10" width="14" height="11" rx="1"/>
+              <line x1="5" y1="14" x2="19" y2="14"/>
             </svg>
             <span>Self Pickup</span>
           </button>
@@ -355,7 +357,30 @@ onMounted(async () => {
     inset 0 1px 0 rgba(255,255,255,0.18);
   transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 0;
-  animation: pill-fog 8s ease-in-out infinite;
+  /* Three parallel animations: fog drift, glow breathing, shimmer sweep.
+     Different periods (8s / 3s / 4s) so they never sync into a marching beat. */
+  animation:
+    pill-fog   8s ease-in-out infinite,
+    pill-pulse 3s ease-in-out infinite;
+}
+
+/* Diagonal shimmer streak across the pill — periodic sweep with rest */
+.seg-indicator::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    115deg,
+    transparent 42%,
+    rgba(255,255,255,0.45) 50%,
+    transparent 58%
+  );
+  background-size: 220% 100%;
+  background-repeat: no-repeat;
+  background-position: 200% 0;
+  animation: pill-shimmer 4s ease-in-out infinite;
+  pointer-events: none;
 }
 
 @keyframes pill-fog {
@@ -366,9 +391,34 @@ onMounted(async () => {
   100% { background-position:   0% 50%; }
 }
 
-/* Respect users who request less motion */
+/* Breathing glow: outer halo intensifies and softens */
+@keyframes pill-pulse {
+  0%, 100% {
+    box-shadow:
+      0 2px 6px  rgba(212,39,108,0.30),
+      0 6px 20px rgba(212,39,108,0.38),
+      inset 0 1px 0 rgba(255,255,255,0.18);
+  }
+  50% {
+    box-shadow:
+      0 3px 10px rgba(212,39,108,0.42),
+      0 10px 28px rgba(212,39,108,0.55),
+      inset 0 1px 0 rgba(255,255,255,0.18);
+  }
+}
+
+/* Shimmer sweep: streak parked off-screen-right for 1.6s, then sweeps across
+   in 1.6s, then parked off-screen-left for 0.8s before loop. Loop boundary
+   jump (-100% → 200%) is invisible since both positions are off-screen. */
+@keyframes pill-shimmer {
+  0%, 40%  { background-position: 200% 0; }
+  80%, 100% { background-position: -100% 0; }
+}
+
+/* Respect users who request less motion — disable all three animations */
 @media (prefers-reduced-motion: reduce) {
-  .seg-indicator { animation: none; }
+  .seg-indicator,
+  .seg-indicator::before { animation: none; }
 }
 .seg-track[data-pickup="self_pickup"] .seg-indicator { transform: translateX(0); }
 .seg-track[data-pickup="delivery"]    .seg-indicator { transform: translateX(100%); }
