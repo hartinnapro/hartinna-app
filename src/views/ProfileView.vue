@@ -82,6 +82,8 @@
               <!-- Hidden username field — required for browser password manager
                    to associate the new password with the correct account -->
               <input
+                id="profile-username-hint"
+                name="username"
                 type="text"
                 autocomplete="username"
                 :value="member?.email || member?.username"
