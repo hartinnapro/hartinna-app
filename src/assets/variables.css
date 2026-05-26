@@ -20,7 +20,7 @@
   --radius-sm:     8px;
   --radius-xs:     6px;
   --shadow-lg:     0 12px 48px rgba(44,24,16,0.13);
-  --nav-h:         64px;
+  --nav-h:         88px;
   --header-h:      60px;
   --font-display:  'Playfair Display', Georgia, serif;
   --font-body:     'DM Sans', sans-serif;
@@ -50,7 +50,7 @@ html.has-bottom-nav::after {
   position: fixed;
   bottom: 0;
   left: 0; right: 0;
-  height: 90px;
+  height: 110px;
   background: linear-gradient(to bottom, var(--bg) 0%, #F4C5DA 100%);
   pointer-events: none;
   z-index: -1;
