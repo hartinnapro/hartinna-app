@@ -423,18 +423,17 @@ onUnmounted(() => {
   cursor: pointer;
   position: relative;
   z-index: 1;
-  transform-origin: left center;
+  transform-origin: top left;
   transition:
     transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
     box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1);
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Expanded photo: 2x scale, anchored to left edge so it grows right + down,
-   never crashes the left viewport border. Floats above neighbours via z-index
-   + soft drop shadow. */
+/* Expanded photo: grows right + down from top-left corner, never upward
+   into the card's top border. scale(4) = 224×224px from the 56×56 base. */
 .item-img.expanded {
-  transform: scale(2);
+  transform: scale(4);
   z-index: 10;
   box-shadow:
     0 12px 32px rgba(44,24,16,0.22),
