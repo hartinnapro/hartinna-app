@@ -79,6 +79,15 @@
           <div class="info-card" style="padding:16px;">
             <div v-if="pwAlert.msg" :class="['alert', 'alert-' + pwAlert.type]">{{ pwAlert.msg }}</div>
             <form @submit.prevent="changePassword">
+              <!-- Hidden username field — required for browser password manager
+                   to associate the new password with the correct account -->
+              <input
+                type="text"
+                autocomplete="username"
+                :value="member?.email || member?.username"
+                readonly
+                style="position:absolute;opacity:0;pointer-events:none;width:0;height:0;"
+              />
               <div class="form-group">
                 <label for="profile-new-password">New Password</label>
                 <div class="input-wrap">
