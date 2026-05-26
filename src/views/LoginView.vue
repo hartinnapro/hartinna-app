@@ -23,7 +23,7 @@
           <div class="form-group">
             <label for="login-email">Email or Username</label>
             <input id="login-email" ref="emailInputRef" v-model="L.email" type="text" placeholder="you@email.com or your_username"
-              :class="{ err: E.email }" />
+              autocomplete="username" :class="{ err: E.email }" />
             <div v-if="E.email" class="field-error">{{ E.email }}</div>
           </div>
 
@@ -31,7 +31,7 @@
             <label for="login-password">Password</label>
             <div class="input-wrap">
               <input id="login-password" v-model="L.password" :type="showPw ? 'text' : 'password'"
-                class="has-toggle" :class="{ err: E.password }"
+                autocomplete="current-password" class="has-toggle" :class="{ err: E.password }"
                 placeholder="Enter your password" />
               <button class="pass-toggle" :class="{ 'is-visible': showPw }" @click="showPw = !showPw" type="button" tabindex="-1">
                 <svg v-if="!showPw" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle class="eye-pupil" cx="12" cy="12" r="3"/></svg>
@@ -123,7 +123,7 @@
           <div class="form-group">
             <label for="reg-username">Username</label>
             <input id="reg-username" v-model="R.username" type="text" placeholder="e.g. sarah_kl"
-              :class="{ err: E.username }"
+              autocomplete="username" :class="{ err: E.username }"
               @input="R.username = R.username.toLowerCase().replace(/[^a-z0-9_-]/g, '')" />
             <div v-if="E.username" class="field-error">{{ E.username }}</div>
             <div v-else class="field-hint">3–20 chars, letters, numbers, _ or - only. Used to log in.</div>
@@ -158,7 +158,7 @@
             <label for="reg-password">Password</label>
             <div class="input-wrap">
               <input id="reg-password" v-model="R.password" :type="showPw ? 'text' : 'password'"
-                class="has-toggle" :class="{ err: E.password }" placeholder="Min. 8 characters" />
+                autocomplete="new-password" class="has-toggle" :class="{ err: E.password }" placeholder="Min. 8 characters" />
               <button class="pass-toggle" @click="showPw = !showPw" type="button" tabindex="-1">
                 <svg v-if="!showPw" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                 <svg v-else width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
@@ -170,7 +170,7 @@
           <div class="form-group">
             <label for="reg-confirmpw">Confirm Password</label>
             <input id="reg-confirmpw" v-model="R.confirmPw" :type="showPw ? 'text' : 'password'"
-              class="has-toggle" :class="{ err: E.confirmPw }" placeholder="Repeat your password" />
+              autocomplete="new-password" class="has-toggle" :class="{ err: E.confirmPw }" placeholder="Repeat your password" />
             <div v-if="E.confirmPw" class="field-error">{{ E.confirmPw }}</div>
           </div>
 
