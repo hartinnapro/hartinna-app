@@ -156,6 +156,7 @@
 
     <!-- Install banner (force mode — triggered by menu item) -->
     <InstallBanner ref="installBanner" :force="true" />
+  </div>
 </template>
 
 <script setup>
