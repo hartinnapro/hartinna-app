@@ -632,20 +632,23 @@ async function doRegister() {
 
 <style>
 /* Global — aurora rendered in a position:fixed pseudo-element so it always
-   covers the viewport regardless of scroll position. This prevents the
-   "different-tone bar" that appears when the browser toolbar slides away
-   and reveals a different part of the scrolling gradient.
-   (background-attachment:fixed is intentionally avoided — it's broken on iOS) */
+   covers the viewport regardless of scroll position.
+   overscroll-behavior-y:none prevents the system overscroll zone from
+   showing a different colour when the user scrolls past page boundaries. */
 
 html.aurora-bg {
-  background: #FEF2F8; /* solid fallback in case ::before is unavailable */
+  background: #FEF2F8;
+  overscroll-behavior-y: none;
 }
 
 html.aurora-bg body {
-  background-color: transparent;
+  /* Solid colour — NOT transparent — so Android Chrome overscroll zone
+     matches the aurora instead of showing white or a system default. */
+  background-color: #FEF2F8;
   background-image: none;
   animation: none;
   max-width: none;
+  overscroll-behavior-y: none;
 }
 
 html.aurora-bg::before {
