@@ -125,8 +125,6 @@ onMounted(() => {
 
   if (isInstalled) return
 
-  if (props.force) { visible.value = true; return }
-
   if (!wasDismissed()) {
     setTimeout(() => { visible.value = true }, 3000)
   }
