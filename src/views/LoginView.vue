@@ -491,7 +491,8 @@ onMounted(async () => {
     if (session) {
       const keepUntil = localStorage.getItem('hpp_keep_until')
       if (!keepUntil || Date.now() < parseInt(keepUntil)) {
-        window.location.replace('/home')
+        window.scrollTo({ top: 0, behavior: 'instant' })
+      router.push('/home')
         return
       }
     }
@@ -565,7 +566,8 @@ async function doLogin() {
           localStorage.removeItem('hpp_keep_until')
         }
       } catch {}
-      window.location.replace('/home')
+      window.scrollTo({ top: 0, behavior: 'instant' })
+      router.push('/home')
     }
   } catch {
     setAlert('Something went wrong. Please try again.')
