@@ -11,18 +11,27 @@ useWakeLock()
 const route = useRoute()
 const cart  = useCartStore()
 
-cart.load()  // instant local render before auth resolves
+cart.load()
 
 onMounted(() => {
   supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT') {
+      cart.signOut()
+      return
+    }
+
+    // Do NOT call initRemote while on the login page.
+    // On iOS PWA (WKWebView standalone), Pinia reactive updates triggered
+    // by auth events fire during keyboard animation and cancel input focus —
+    // the keyboard never appears. The cart is synced from CartView instead.
+    if (route.path === '/login') return
+
     if (session && (
       event === 'INITIAL_SESSION' ||
       event === 'SIGNED_IN'       ||
-      event === 'TOKEN_REFRESHED'    // catches mobile where INITIAL_SESSION
-    )) {                             // fires with null due to expired token,
-      cart.initRemote(session.user.id) // then TOKEN_REFRESHED fires once fixed
-    } else if (event === 'SIGNED_OUT') {
-      cart.signOut()
+      event === 'TOKEN_REFRESHED'
+    )) {
+      cart.initRemote(session.user.id)
     }
   })
 })
