@@ -11,16 +11,13 @@ useWakeLock()
 
 const route = useRoute()
 const cart  = useCartStore()
-const { onTouchStart, onTouchEnd } = useSwipeNav()
+const { onTouchStart, onTouchEnd, unlock } = useSwipeNav()
 
 cart.load()
 
 onMounted(() => {
   supabase.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_OUT') {
-      cart.signOut()
-      return
-    }
+    if (event === 'SIGNED_OUT') { cart.signOut(); return }
     if (route.path === '/login') return
     if (session && (
       event === 'INITIAL_SESSION' ||
@@ -32,40 +29,28 @@ onMounted(() => {
   })
 })
 
-const NAV_PATHS = ['/home', '/cart', '/orders', '/profile', '/payment']
-const showNav = computed(() =>
-  NAV_PATHS.some(p => route.path === p || route.path.startsWith(p + '/'))
-)
+const NAV_PATHS   = ['/home', '/cart', '/orders', '/profile', '/payment']
+const SWIPE_PATHS = ['/home', '/cart', '/orders', '/profile']
+
+const showNav      = computed(() => NAV_PATHS.some(p => route.path === p))
+const swipeActive  = computed(() => SWIPE_PATHS.includes(route.path))
+
 watch(showNav, show => {
   document.documentElement.classList.toggle('has-bottom-nav', show)
 }, { immediate: true })
-
-function onAfterEnter() {
-  slideDirection.value = ''
-}
 </script>
 
 <template>
-  <!--
-    touch-action:pan-y  → tells Android Chrome we own horizontal swipes;
-                          prevents the system back/forward gesture intercepting
-    overscroll-behavior-x:none → stops iOS rubber-band on horizontal drags
-  -->
   <div
     class="swipe-root"
-    @touchstart.passive="onTouchStart"
-    @touchend.passive="onTouchEnd"
+    @touchstart.passive="swipeActive ? onTouchStart($event) : undefined"
+    @touchend.passive="swipeActive ? onTouchEnd($event) : undefined"
   >
     <RouterView v-slot="{ Component, route }">
-      <!--
-        mode="out-in": leaving page animates out FIRST (150ms), then entering
-        page slides in (250ms). No simultaneous position:absolute rendering,
-        no gap/flash, and the 150ms leave phase acts as a natural swipe lock.
-      -->
       <Transition
         :name="slideDirection || 'page'"
         mode="out-in"
-        @after-enter="onAfterEnter"
+        @after-enter="unlock"
       >
         <component :is="Component" :key="route.path" />
       </Transition>
@@ -78,37 +63,31 @@ function onAfterEnter() {
 .swipe-root {
   position: relative;
   min-height: 100dvh;
-  background: var(--bg);         /* covers the 1-frame gap in mode=out-in */
-  touch-action: pan-y;
-  overscroll-behavior-x: none;
+  background: var(--bg);
 }
 
-/* ── Default transition: fade ───────────────────────────────────────────── */
+/* ── Default: fade ──────────────────────────────────────────────────────── */
 .page-leave-active { transition: opacity 0.14s ease-in; }
 .page-enter-active { transition: opacity 0.18s ease-out; }
 .page-enter-from   { opacity: 0; }
 .page-leave-to     { opacity: 0; }
 
-/* ── Slide LEFT (swipe left → next tab enters from right) ───────────────── */
-/* Current page: quick fade-slide left (150ms) */
+/* ── Slide LEFT: current fades out left, new slides in from right ───────── */
 .slide-left-leave-active {
   transition: transform 0.15s ease-in, opacity 0.15s ease-in;
 }
-.slide-left-leave-to { transform: translateX(-18%); opacity: 0; }
-/* New page: slides in from right (250ms) */
+.slide-left-leave-to   { transform: translateX(-20%); opacity: 0; }
 .slide-left-enter-active {
   transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 .slide-left-enter-from { transform: translateX(100%); }
 .slide-left-enter-to   { transform: translateX(0); }
 
-/* ── Slide RIGHT (swipe right → prev tab enters from left) ──────────────── */
-/* Current page: quick fade-slide right (150ms) */
+/* ── Slide RIGHT: current fades out right, new slides in from left ──────── */
 .slide-right-leave-active {
   transition: transform 0.15s ease-in, opacity 0.15s ease-in;
 }
-.slide-right-leave-to { transform: translateX(18%); opacity: 0; }
-/* New page: slides in from left (250ms) */
+.slide-right-leave-to   { transform: translateX(20%); opacity: 0; }
 .slide-right-enter-active {
   transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }

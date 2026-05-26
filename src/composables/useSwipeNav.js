@@ -3,25 +3,21 @@ import { useRouter, useRoute } from 'vue-router'
 
 export const slideDirection = ref('')
 
-const TABS      = ['/home', '/cart', '/orders', '/profile']
-const TAB_INDEX = Object.fromEntries(TABS.map((t, i) => [t, i]))
+// Only these pages participate in swipe navigation
+const SWIPE_TABS = ['/home', '/cart', '/orders', '/profile']
+const TAB_INDEX  = Object.fromEntries(SWIPE_TABS.map((t, i) => [t, i]))
 
-const IS_ANDROID = /android/i.test(navigator.userAgent)
+// Gesture thresholds — mid-screen swipe, no edge restriction
+const MIN_DX     = 60    // minimum horizontal travel (px)
+const MAX_DT     = 350   // maximum gesture duration (ms) — not a slow drag
+const H_RATIO    = 1.8   // |dx| must exceed |dy| × this — clearly horizontal
 
-// 400ms cooldown covers the full animation (150ms leave + 250ms enter)
-const NAV_COOLDOWN = 400
-let   lastNavAt    = 0
+// Lock prevents queuing a new navigation before current transition finishes
+let locked = false
 
 export function useSwipeNav() {
   const router = useRouter()
   const route  = useRoute()
-
-  // Android: system OS gesture intercepts edge swipes before WebView sees them.
-  // touch-action:pan-y does NOT stop OS-level gestures. Disabling on Android
-  // entirely avoids the conflict — the tab bar handles navigation there.
-  if (IS_ANDROID) {
-    return { onTouchStart: () => {}, onTouchEnd: () => {} }
-  }
 
   let startX = 0, startY = 0, startTime = 0
 
@@ -33,48 +29,40 @@ export function useSwipeNav() {
   }
 
   function onTouchEnd(e) {
+    if (locked) return
     if (e.changedTouches.length !== 1) return
 
-    const now = Date.now()
-    if (now - lastNavAt < NAV_COOLDOWN) return
+    // Only active on the 4 main tab pages
+    const idx = TAB_INDEX[route.path]
+    if (idx === undefined) return
 
     const dx = e.changedTouches[0].clientX - startX
     const dy = e.changedTouches[0].clientY - startY
-    const dt = now - startTime
+    const dt = Date.now() - startTime
 
-    // Require strong horizontal swipe starting away from edges.
-    // Edge-zone swipes conflict with iOS WKWebView's own back gesture —
-    // both iOS and our code would navigate, corrupting the route stack.
-    const W = window.innerWidth
-    if (startX < 30 || startX > W - 30)      return  // stay clear of iOS edge
-    if (Math.abs(dx) < 80)                   return  // strong swipe needed
-    if (Math.abs(dx) < Math.abs(dy) * 2.0)  return  // clearly horizontal
-    if (dt > 400)                            return
+    if (Math.abs(dx) < MIN_DX)               return  // too short
+    if (Math.abs(dx) < Math.abs(dy) * H_RATIO) return  // too diagonal
+    if (dt > MAX_DT)                         return  // too slow
 
-    const goBack    = dx > 0
-    const goForward = dx < 0
-    const path      = route.path
-    const idx       = TAB_INDEX[path]
+    const goBack    = dx > 0  // swiped right → previous tab
+    const goForward = dx < 0  // swiped left  → next tab
 
-    // PaymentView: swipe right → back to Cart
-    if (path === '/payment' && goBack) {
-      lastNavAt = now
-      slideDirection.value = 'slide-right'
-      router.push('/cart')
-      return
-    }
+    locked = true
 
-    if (idx === undefined) return
-
-    lastNavAt = now
     if (goBack) {
       slideDirection.value = 'slide-right'
-      router.push(TABS[(idx - 1 + TABS.length) % TABS.length])
+      router.push(SWIPE_TABS[(idx - 1 + SWIPE_TABS.length) % SWIPE_TABS.length])
     } else {
       slideDirection.value = 'slide-left'
-      router.push(TABS[(idx + 1) % TABS.length])
+      router.push(SWIPE_TABS[(idx + 1) % SWIPE_TABS.length])
     }
   }
 
-  return { onTouchStart, onTouchEnd }
+  // Called by App.vue after the enter transition completes
+  function unlock() {
+    locked = false
+    slideDirection.value = ''
+  }
+
+  return { onTouchStart, onTouchEnd, unlock }
 }
