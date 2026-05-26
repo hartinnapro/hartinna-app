@@ -170,7 +170,7 @@ import { useInstallPrompt } from '@/composables/useInstallPrompt'
 const router = useRouter()
 const { canInstall, showIosPrompt, isInstalled } = useInstallPrompt()
 const installBanner = ref(null)
-const canShowInstall = computed(() => !isInstalled && (canInstall.value || showIosPrompt))
+const canShowInstall = computed(() => !isInstalled)
 const state       = ref('loading')
 const member      = reactive({ full_name:'', phone:'', region:'', level:'' })
 const email       = ref('')
