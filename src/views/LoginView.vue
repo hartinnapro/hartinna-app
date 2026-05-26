@@ -631,13 +631,21 @@ async function doRegister() {
 </script>
 
 <style>
-/* html + body: matching background so iOS overscroll zone shows the same
-   base pink as the aurora rather than white. overflow:hidden was tried to
-   eliminate the overscroll bar but breaks the iOS PWA keyboard — WKWebView
-   standalone can't scroll focused inputs into view when no ancestor scrolls. */
+/* Aurora on html — NOT on .page. Having a continuous CSS animation on the
+   flex container that wraps inputs blocks keyboard focus on iOS WKWebView
+   standalone mode. Keeping the animation on the root html element avoids
+   this while still painting the aurora across the full viewport.
+   Body background matches the aurora base colour to reduce overscroll contrast. */
 
 html.aurora-bg {
   background: #FEF2F8;
+  background-image:
+    radial-gradient(ellipse at 20% 20%, rgba(255,210,235,0.9) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(230,100,160,0.3) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 10%, rgba(245,190,235,0.55) 0%, transparent 45%),
+    radial-gradient(ellipse at 10% 80%, rgba(255,225,242,0.7) 0%, transparent 45%);
+  background-size: 200% 200%;
+  animation: aurora-shift 12s ease-in-out infinite;
 }
 
 html.aurora-bg body {
@@ -698,23 +706,8 @@ html.aurora-bg body {
 
 .page {
   font-family: 'DM Sans', sans-serif;
-
-  /* Normal document flow — required for iOS PWA keyboard to work.
-     overflow-y:auto on .page with overflow:hidden on html/body was
-     breaking WKWebView standalone keyboard input. */
+  background: transparent;
   min-height: 100dvh;
-
-  /* Aurora on the page element so it fills the full scroll height */
-  background: #FEF2F8;
-  background-image:
-    radial-gradient(ellipse at 20% 20%, rgba(255,210,235,0.9) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 80%, rgba(230,100,160,0.3) 0%, transparent 50%),
-    radial-gradient(ellipse at 60% 10%, rgba(245,190,235,0.55) 0%, transparent 45%),
-    radial-gradient(ellipse at 10% 80%, rgba(255,225,242,0.7) 0%, transparent 45%);
-  background-size: 200% 200%;
-  background-repeat: no-repeat;
-  animation: aurora-shift 12s ease-in-out infinite;
-
   display: flex;
   flex-direction: column;
   align-items: center;
