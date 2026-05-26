@@ -11,16 +11,16 @@ useWakeLock()
 const route = useRoute()
 const cart  = useCartStore()
 
-// Load local cart immediately on app boot so the badge count
-// is visible before auth resolves.
-cart.load()
+cart.load()  // instant local render before auth resolves
 
-// Sync cart with Supabase whenever auth state is known.
-// INITIAL_SESSION fires on first load; SIGNED_IN fires after login.
 onMounted(() => {
   supabase.auth.onAuthStateChange((event, session) => {
-    if ((event === 'INITIAL_SESSION' || event === 'SIGNED_IN') && session) {
-      cart.initRemote(session.user.id)
+    if (session && (
+      event === 'INITIAL_SESSION' ||
+      event === 'SIGNED_IN'       ||
+      event === 'TOKEN_REFRESHED'    // catches mobile where INITIAL_SESSION
+    )) {                             // fires with null due to expired token,
+      cart.initRemote(session.user.id) // then TOKEN_REFRESHED fires once fixed
     } else if (event === 'SIGNED_OUT') {
       cart.signOut()
     }
@@ -31,8 +31,7 @@ const NAV_PATHS = ['/home', '/cart', '/orders', '/profile', '/payment']
 const showNav = computed(() =>
   NAV_PATHS.some(p => route.path === p || route.path.startsWith(p + '/'))
 )
-
-watch(showNav, (show) => {
+watch(showNav, show => {
   document.documentElement.classList.toggle('has-bottom-nav', show)
 }, { immediate: true })
 </script>
@@ -47,17 +46,8 @@ watch(showNav, (show) => {
 </template>
 
 <style>
-.page-leave-active {
-  transition: opacity 0.14s ease-in;
-}
-.page-enter-active {
-  transition: opacity 0.22s ease-out, transform 0.22s ease-out;
-}
-.page-enter-from {
-  opacity: 0;
-  transform: translateY(6px);
-}
-.page-leave-to {
-  opacity: 0;
-}
+.page-leave-active { transition: opacity 0.14s ease-in; }
+.page-enter-active { transition: opacity 0.22s ease-out, transform 0.22s ease-out; }
+.page-enter-from   { opacity: 0; transform: translateY(6px); }
+.page-leave-to     { opacity: 0; }
 </style>

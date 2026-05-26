@@ -1,8 +1,14 @@
 <template>
   <div>
     <main class="main">
+      <!-- Remote sync loading -->
+      <div v-if="cart.cartLoading" class="loading-cart">
+        <div class="spinner-sm"></div>
+        <span>Syncing your cart…</span>
+      </div>
+
       <!-- Empty state -->
-      <div v-if="cartList.length === 0" class="empty">
+      <div v-else-if="cartList.length === 0" class="empty">
         <svg width="56" height="56" fill="none" stroke="var(--primary)" stroke-width="1.5" viewBox="0 0 24 24">
           <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
           <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
@@ -264,7 +270,14 @@ function proceed() {
 onMounted(async () => {
   const session = await guardedSession()
   if (!session) { router.push('/login'); return }
-  cart.load()
+
+  // Fallback: if App.vue's auth listener hasn't fired yet (can happen on
+  // mobile when the token was expired on load and TOKEN_REFRESHED is still
+  // pending), trigger the remote sync directly from here.
+  if (!cart.remoteSynced) {
+    cart.initRemote(session.user.id)
+  }
+
   document.addEventListener('click', handlePhotoOutsideClick)
 })
 
@@ -362,6 +375,20 @@ onUnmounted(() => {
   color: var(--text-muted);
   letter-spacing: 0.02em;
 }
+
+.loading-cart {
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px; padding: 60px 24px;
+  color: var(--text-muted); font-size: 14px;
+}
+.spinner-sm {
+  width: 18px; height: 18px; flex-shrink: 0;
+  border: 2px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .empty { text-align: center; padding: 60px 24px; color: var(--text-muted); }
 .empty svg { opacity: 0.2; margin-bottom: 14px; display: block; margin-left: auto; margin-right: auto; }
