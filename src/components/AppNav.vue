@@ -127,12 +127,9 @@ function navigate(item) {
 }
 
 .pill-tab.active {
-  background: rgba(212, 39, 108, 0.82);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow:
-    0 2px 12px rgba(212, 39, 108, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  background: var(--primary);
+  box-shadow: 0 2px 12px rgba(212, 39, 108, 0.30),
+              inset 0 1px 0 rgba(255, 255, 255, 0.20);
 }
 
 /* ── Icon wrapper (positions badge) ───────────────────────────────────── */
