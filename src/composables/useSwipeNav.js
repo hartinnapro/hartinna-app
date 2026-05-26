@@ -1,7 +1,3 @@
-// src/composables/useSwipeNav.js
-// Horizontal swipe gesture → tab switching or back navigation.
-// slideDirection is a module-level singleton so App.vue can read it
-// without prop drilling.
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
@@ -10,12 +6,18 @@ export const slideDirection = ref('')
 const TABS      = ['/home', '/cart', '/orders', '/profile']
 const TAB_INDEX = Object.fromEntries(TABS.map((t, i) => [t, i]))
 
-// Edge zone (px from screen edge) that triggers the gesture.
-// Keeps us clear of in-page interactive elements.
-const EDGE_PX    = 45
-const MIN_DX     = 55   // minimum horizontal travel
-const MAX_DT     = 450  // ms — ignore slow drags
-const RATIO      = 1.5  // |dx| must exceed |dy| × RATIO (mostly horizontal)
+// Detect once at module load — determines gesture zone strategy
+const IS_ANDROID = /android/i.test(navigator.userAgent)
+
+// iOS  : swipes must START near the screen edge (system gesture-safe)
+// Android: system owns the edges (~20px); detect from centre zone instead
+const IOS_EDGE_PX   = 45   // px from edge for iOS
+const AND_SAFE_MIN  = 60   // px from left edge — Android safe start
+const AND_MIN_DX    = 80   // stronger swipe needed on Android (no edge anchor)
+const AND_RATIO     = 2.0  // stricter horizontal ratio for Android
+const IOS_MIN_DX    = 55
+const IOS_RATIO     = 1.5
+const MAX_DT        = 450  // ms — ignore slow drags
 
 export function useSwipeNav() {
   const router = useRouter()
@@ -38,36 +40,45 @@ export function useSwipeNav() {
     const dt = Date.now() - startTime
     const W  = window.innerWidth
 
-    if (Math.abs(dx) < MIN_DX)               return  // too short
-    if (Math.abs(dx) < Math.abs(dy) * RATIO) return  // too vertical
-    if (dt > MAX_DT)                         return  // too slow
+    const goBack    = dx > 0  // finger moved right
+    const goForward = dx < 0  // finger moved left
 
-    const goBack    = dx > 0  // finger moved right → back / previous tab
-    const goForward = dx < 0  // finger moved left  → forward / next tab
-
-    // Must start near the screen edge
-    if (goBack    && startX > EDGE_PX)          return
-    if (goForward && startX < W - EDGE_PX)      return
+    if (IS_ANDROID) {
+      // Stay out of Android's system gesture zones at both edges
+      if (startX < AND_SAFE_MIN || startX > W - AND_SAFE_MIN) return
+      if (Math.abs(dx) < AND_MIN_DX)               return
+      if (Math.abs(dx) < Math.abs(dy) * AND_RATIO) return
+      if (dt > MAX_DT)                              return
+    } else {
+      // iOS: restrict to screen edge so in-page interactions don't conflict
+      if (Math.abs(dx) < IOS_MIN_DX)               return
+      if (Math.abs(dx) < Math.abs(dy) * IOS_RATIO) return
+      if (dt > MAX_DT)                              return
+      if (goBack    && startX > IOS_EDGE_PX)        return
+      if (goForward && startX < W - IOS_EDGE_PX)   return
+    }
 
     const path = route.path
     const idx  = TAB_INDEX[path]
 
     // PaymentView → back to Cart
-    if (path === '/payment' && goBack) {
+    // Android uses its own system back gesture so skip for Android
+    if (path === '/payment' && goBack && !IS_ANDROID) {
       slideDirection.value = 'slide-right'
       router.push('/cart')
       return
     }
 
-    // Tab-to-tab
     if (idx === undefined) return
 
-    if (goBack && idx > 0) {
+    if (goBack) {
+      // Circular: Home wraps to Profile
       slideDirection.value = 'slide-right'
-      router.push(TABS[idx - 1])
-    } else if (goForward && idx < TABS.length - 1) {
+      router.push(TABS[(idx - 1 + TABS.length) % TABS.length])
+    } else {
+      // Circular: Profile wraps to Home
       slideDirection.value = 'slide-left'
-      router.push(TABS[idx + 1])
+      router.push(TABS[(idx + 1) % TABS.length])
     }
   }
 
