@@ -94,8 +94,10 @@ function navigate(item) {
   background: linear-gradient(
     180deg,
     #ffffff     0%,
-    #fdf4f8    40%,
-    #f7e6f0   100%
+    #fff2f7    18%,
+    #fce4f0    50%,
+    #f0cfe2    78%,
+    #e2bdd4   100%
   );
   border: 1px solid rgba(240, 214, 228, 0.7);
   border-radius: 50px;
@@ -103,8 +105,8 @@ function navigate(item) {
   box-shadow:
     0 4px 20px rgba(212, 39, 108, 0.12),
     0 1px 4px  rgba(212, 39, 108, 0.06),
-    inset 0  2px 2px rgba(255, 255, 255, 1.00),
-    inset 0 -4px 10px rgba(180, 80, 130, 0.10);
+    inset 0  2px 3px rgba(255, 240, 248, 1.00),
+    inset 0 -6px 14px rgba(160, 60, 110, 0.18);
 
   z-index: 99;
   pointer-events: none;
@@ -113,19 +115,20 @@ function navigate(item) {
   user-select: none;
 }
 
-/* Pearl gloss — oval specular highlight on top of the nav pill */
+/* Pearl gloss — pink-tinted specular highlight, like light bouncing off a pearl */
 .pill-nav::after {
   content: '';
   position: absolute;
   top: 0;
   left: 12%;
   right: 12%;
-  height: 48%;
+  height: 52%;
   background: radial-gradient(
     ellipse at 50% 0%,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.55) 45%,
-    rgba(255, 255, 255, 0.00) 100%
+    rgba(255, 245, 250, 0.98) 0%,
+    rgba(255, 230, 242, 0.70) 40%,
+    rgba(255, 210, 235, 0.20) 70%,
+    rgba(255, 200, 230, 0.00) 100%
   );
   border-radius: 50%;
   pointer-events: none;
