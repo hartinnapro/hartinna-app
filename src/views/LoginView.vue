@@ -11,8 +11,11 @@
       </div>
     </div>
 
-    <!-- Card -->
-    <div class="card">
+    <!-- Card: aurora-layer is a sibling rendered before the card so
+         backdrop-filter reliably captures it across all browsers -->
+    <div class="card-wrap">
+      <div class="card-aurora-layer" aria-hidden="true"></div>
+      <div class="card">
       <Transition name="fade" mode="out-in">
 
         <!-- LOGIN -->
@@ -240,6 +243,7 @@
         <span v-else>Already have an account? <a @click="go('login')">Sign in</a></span>
       </div>
     </div>
+    </div><!-- /card-wrap -->
 
     <div class="footer">© 2026 Hartinna Partner · All rights reserved</div>
 
@@ -786,8 +790,29 @@ html.aurora-bg body { background-color: #FEF2F8; background-image: none; animati
 }
 
 /* ── Card ────────────────────────────────────────────────────────────────── */
-.card {
+.card-wrap {
+  position: relative;
   width: 90%;
+}
+.card-aurora-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  background: #FEF2F8;
+  background-image:
+    radial-gradient(ellipse at 20% 20%, rgba(255,210,235,0.9) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(230,100,160,0.3) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 10%, rgba(245,190,235,0.55) 0%, transparent 45%),
+    radial-gradient(ellipse at 10% 80%, rgba(255,225,242,0.7) 0%, transparent 45%);
+  background-size: 200% 200%;
+  animation: aurora-shift 12s ease-in-out infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+.card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(32px) saturate(1.6);
   -webkit-backdrop-filter: blur(32px) saturate(1.6);
