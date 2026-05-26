@@ -126,6 +126,11 @@
               <div class="menu-text"><div class="menu-label">Activity Log</div><div class="menu-desc">View your account activity</div></div>
               <svg class="menu-chevron" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
             </button>
+            <button v-if="canShowInstall" class="menu-item" @click="installBanner?.open()">
+              <div class="menu-icon ic-install"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="15" x2="12" y2="8"/><polyline points="9 12 12 15 15 12"/></svg></div>
+              <div class="menu-text"><div class="menu-label">Add to Home Screen</div><div class="menu-desc">Install app for faster access</div></div>
+              <svg class="menu-chevron" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
             <button class="menu-item" @click="showSignOut = true">
               <div class="menu-icon ic-logout"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
               <div class="menu-text"><div class="menu-label" style="color:var(--error);">Sign Out</div></div>
@@ -149,7 +154,8 @@
       </div>
     </Transition>
 
-  </div>
+    <!-- Install banner (force mode — triggered by menu item) -->
+    <InstallBanner ref="installBanner" :force="true" />
 </template>
 
 <script setup>
@@ -158,7 +164,12 @@ import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import { guardedSession } from '@/lib/session'
 import { hppGetCache, hppSetCache } from '@/lib/cache'
+import InstallBanner from '@/components/InstallBanner.vue'
+import { useInstallPrompt } from '@/composables/useInstallPrompt'
 const router = useRouter()
+const { canInstall, showIosPrompt, isInstalled } = useInstallPrompt()
+const installBanner = ref(null)
+const canShowInstall = computed(() => !isInstalled && (canInstall.value || showIosPrompt))
 const state       = ref('loading')
 const member      = reactive({ full_name:'', phone:'', region:'', level:'' })
 const email       = ref('')
@@ -312,6 +323,7 @@ input::placeholder { color:#C5ABA8; }
 .menu-chevron { color:var(--text-muted); }
 .ic-orders { background:#EEF7F2;color:#2E7D52; }
 .ic-audit  { background:#E8DAEF;color:#512E5F; }
+.ic-install{ background:#FDE8F2;color:var(--primary); }
 .ic-logout { background:#FEF0EE;color:var(--error); }
 
 .dialog-overlay { position:fixed;inset:0;background:rgba(44,24,16,0.45);display:flex;align-items:flex-end;z-index:200; }

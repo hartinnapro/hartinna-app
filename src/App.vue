@@ -7,6 +7,7 @@ import { usePullToRefresh, ptrOffset, ptrReady, ptrReleasing } from '@/composabl
 import { useCartStore } from '@/stores/cart'
 import { supabase } from '@/lib/supabase'
 import AppNav from '@/components/AppNav.vue'
+import InstallBanner from '@/components/InstallBanner.vue'
 
 useWakeLock()
 usePullToRefresh()  // registers its own document listeners for iOS PWA
@@ -93,6 +94,7 @@ function onAfterEnter() { unlock() }
       </Transition>
     </RouterView>
     <AppNav v-show="showNav" />
+    <InstallBanner v-if="!onLoginPage" />
   </div>
 </template>
 
