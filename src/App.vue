@@ -22,6 +22,7 @@ const swipeRoot = ref(null)
 onMounted(() => {
   supabase.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_OUT') { cart.signOut(); return }
+    if (route.path === '/login') return
     if (session && (
       event === 'INITIAL_SESSION' ||
       event === 'SIGNED_IN'       ||
