@@ -78,8 +78,9 @@ function onAfterEnter() {
 .swipe-root {
   position: relative;
   min-height: 100dvh;
-  touch-action: pan-y;           /* Android: we handle horizontal */
-  overscroll-behavior-x: none;   /* iOS: no rubber-band on horizontal drag */
+  background: var(--bg);         /* covers the 1-frame gap in mode=out-in */
+  touch-action: pan-y;
+  overscroll-behavior-x: none;
 }
 
 /* ── Default transition: fade ───────────────────────────────────────────── */

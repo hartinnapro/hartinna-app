@@ -8,14 +8,20 @@ const TAB_INDEX = Object.fromEntries(TABS.map((t, i) => [t, i]))
 
 const IS_ANDROID = /android/i.test(navigator.userAgent)
 
-// Cooldown prevents new navigation while transition is still running.
-// mode="out-in" leave takes ~150ms — 160ms lock covers it with margin.
-const NAV_COOLDOWN = 160
+// 400ms cooldown covers the full animation (150ms leave + 250ms enter)
+const NAV_COOLDOWN = 400
 let   lastNavAt    = 0
 
 export function useSwipeNav() {
   const router = useRouter()
   const route  = useRoute()
+
+  // Android: system OS gesture intercepts edge swipes before WebView sees them.
+  // touch-action:pan-y does NOT stop OS-level gestures. Disabling on Android
+  // entirely avoids the conflict — the tab bar handles navigation there.
+  if (IS_ANDROID) {
+    return { onTouchStart: () => {}, onTouchEnd: () => {} }
+  }
 
   let startX = 0, startY = 0, startTime = 0
 
@@ -30,37 +36,28 @@ export function useSwipeNav() {
     if (e.changedTouches.length !== 1) return
 
     const now = Date.now()
-    if (now - lastNavAt < NAV_COOLDOWN) return  // still in transition
+    if (now - lastNavAt < NAV_COOLDOWN) return
 
     const dx = e.changedTouches[0].clientX - startX
     const dy = e.changedTouches[0].clientY - startY
     const dt = now - startTime
-    const W  = window.innerWidth
+
+    // Require strong horizontal swipe starting away from edges.
+    // Edge-zone swipes conflict with iOS WKWebView's own back gesture —
+    // both iOS and our code would navigate, corrupting the route stack.
+    const W = window.innerWidth
+    if (startX < 30 || startX > W - 30)      return  // stay clear of iOS edge
+    if (Math.abs(dx) < 80)                   return  // strong swipe needed
+    if (Math.abs(dx) < Math.abs(dy) * 2.0)  return  // clearly horizontal
+    if (dt > 400)                            return
 
     const goBack    = dx > 0
     const goForward = dx < 0
+    const path      = route.path
+    const idx       = TAB_INDEX[path]
 
-    if (IS_ANDROID) {
-      // Android system gesture owns the edges (~20px).
-      // Detect from the middle zone only; needs a strong, clean horizontal swipe.
-      if (startX < 60 || startX > W - 60)       return
-      if (Math.abs(dx) < 80)                     return
-      if (Math.abs(dx) < Math.abs(dy) * 2.0)    return
-      if (dt > 450)                              return
-    } else {
-      // iOS: restrict to screen edge to avoid clashing with in-page interactions
-      if (Math.abs(dx) < 55)                     return
-      if (Math.abs(dx) < Math.abs(dy) * 1.5)    return
-      if (dt > 450)                              return
-      if (goBack    && startX > 45)              return
-      if (goForward && startX < W - 45)          return
-    }
-
-    const path = route.path
-    const idx  = TAB_INDEX[path]
-
-    // PaymentView: only swipe-back on iOS (Android system back handles this)
-    if (path === '/payment' && goBack && !IS_ANDROID) {
+    // PaymentView: swipe right → back to Cart
+    if (path === '/payment' && goBack) {
       lastNavAt = now
       slideDirection.value = 'slide-right'
       router.push('/cart')
