@@ -28,13 +28,17 @@
         </div>
 
         <div class="cart-item" v-for="item in cartList" :key="item.product.id">
-          <div
-            class="item-img"
-            :class="{ expanded: expandedPhotoId === item.product.id }"
-            @click.stop="togglePhoto(item)"
-          >
-            <img v-if="item.product.image_url" :src="item.product.image_url" :alt="item.product.name" />
-            <span v-else>{{ item.product.name[0] }}</span>
+          <!-- item-img-wrap holds the 56×56 space in the flex layout.
+               The inner item-img expands with actual width/height so iOS
+               renders at native resolution — no GPU-stretch blurriness. -->
+          <div class="item-img-wrap" @click.stop="togglePhoto(item)">
+            <div
+              class="item-img"
+              :class="{ expanded: expandedPhotoId === item.product.id }"
+            >
+              <img v-if="item.product.image_url" :src="item.product.image_url" :alt="item.product.name" />
+              <span v-else>{{ item.product.name[0] }}</span>
+            </div>
           </div>
           <div class="item-info">
             <div class="item-sku">{{ item.product.sku }}</div>
@@ -185,7 +189,7 @@ function togglePhoto(item) {
 
 function handlePhotoOutsideClick(e) {
   if (!expandedPhotoId.value) return
-  if (!e.target.closest('.item-img.expanded')) {
+  if (!e.target.closest('.item-img-wrap')) {
     expandedPhotoId.value = null
   }
 }
@@ -414,26 +418,34 @@ onUnmounted(() => {
   padding: 14px; display: flex; gap: 12px;
   margin-bottom: 10px; box-shadow: 0 2px 8px rgba(44,24,16,0.05);
 }
+.item-img-wrap {
+  width: 56px; height: 56px;
+  flex-shrink: 0;
+  position: relative;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
 .item-img {
   width: 56px; height: 56px; border-radius: var(--radius-xs);
   background: linear-gradient(135deg, #FDF0F2, #FBF3EE);
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
   font-family: var(--font-display); font-size: 20px; color: var(--primary);
   overflow: hidden;
-  cursor: pointer;
   position: relative;
   z-index: 1;
-  transform-origin: top left;
   transition:
-    transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    width  0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    height 0.28s cubic-bezier(0.4, 0, 0.2, 1),
     box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-  -webkit-tap-highlight-color: transparent;
 }
 
-/* Expanded photo: grows right + down from top-left corner, never upward
-   into the card's top border. scale(4) = 224×224px from the 56×56 base. */
+/* Expanded: renders natively at 224×224 — no GPU upscale, no blurriness on
+   iOS Retina. position:absolute keeps the wrapper's 56×56 slot in the flex
+   row so the card layout never shifts. Grows right + down from top-left. */
 .item-img.expanded {
-  transform: scale(4);
+  position: absolute;
+  top: 0; left: 0;
+  width: 224px; height: 224px;
   z-index: 10;
   box-shadow:
     0 12px 32px rgba(44,24,16,0.22),
