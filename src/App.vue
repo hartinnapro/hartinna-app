@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, computed, watch } from 'vue'
+import { onMounted, onUnmounted, computed, watch, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useWakeLock } from '@/composables/useWakeLock'
 import { useSwipeNav, slideDirection } from '@/composables/useSwipeNav'
@@ -11,10 +11,14 @@ useWakeLock()
 
 const route = useRoute()
 const cart  = useCartStore()
-const { onTouchStart, onTouchEnd, unlock } = useSwipeNav()
+const { onTouchStart, onTouchMove, onTouchEnd, unlock } = useSwipeNav()
 
 cart.load()
 
+// touchmove must be non-passive so we can call preventDefault() to
+// stop iOS from scrolling vertically during a horizontal swipe.
+// Vue's @touchmove.passive cannot be overridden, so we use addEventListener.
+const swipeRoot = ref(null)
 onMounted(() => {
   supabase.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_OUT') { cart.signOut(); return }
@@ -27,6 +31,16 @@ onMounted(() => {
       cart.initRemote(session.user.id)
     }
   })
+
+  if (swipeRoot.value) {
+    swipeRoot.value.addEventListener('touchmove', onTouchMove, { passive: false })
+  }
+})
+
+onUnmounted(() => {
+  if (swipeRoot.value) {
+    swipeRoot.value.removeEventListener('touchmove', onTouchMove)
+  }
 })
 
 const NAV_PATHS   = ['/home', '/cart', '/orders', '/profile', '/payment']
@@ -42,6 +56,7 @@ watch(showNav, show => {
 
 <template>
   <div
+    ref="swipeRoot"
     class="swipe-root"
     @touchstart.passive="swipeActive ? onTouchStart($event) : undefined"
     @touchend.passive="swipeActive ? onTouchEnd($event) : undefined"

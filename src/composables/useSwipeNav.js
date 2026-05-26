@@ -3,16 +3,13 @@ import { useRouter, useRoute } from 'vue-router'
 
 export const slideDirection = ref('')
 
-// Only these pages participate in swipe navigation
 const SWIPE_TABS = ['/home', '/cart', '/orders', '/profile']
 const TAB_INDEX  = Object.fromEntries(SWIPE_TABS.map((t, i) => [t, i]))
 
-// Gesture thresholds — mid-screen swipe, no edge restriction
-const MIN_DX     = 60    // minimum horizontal travel (px)
-const MAX_DT     = 350   // maximum gesture duration (ms) — not a slow drag
-const H_RATIO    = 1.8   // |dx| must exceed |dy| × this — clearly horizontal
+const MIN_DX  = 60
+const MAX_DT  = 350
+const H_RATIO = 1.8
 
-// Lock prevents queuing a new navigation before current transition finishes
 let locked = false
 
 export function useSwipeNav() {
@@ -20,19 +17,47 @@ export function useSwipeNav() {
   const route  = useRoute()
 
   let startX = 0, startY = 0, startTime = 0
+  let axisLocked = false   // true once we've committed to horizontal
+  let isHorizontal = false // determined during touchmove
 
   function onTouchStart(e) {
     if (e.touches.length !== 1) return
-    startX    = e.touches[0].clientX
-    startY    = e.touches[0].clientY
-    startTime = Date.now()
+    startX       = e.touches[0].clientX
+    startY       = e.touches[0].clientY
+    startTime    = Date.now()
+    axisLocked   = false
+    isHorizontal = false
+  }
+
+  // Non-passive: allows preventDefault() to stop vertical scroll jitter on iOS
+  function onTouchMove(e) {
+    if (e.touches.length !== 1) return
+    if (axisLocked) {
+      // Axis already determined — if horizontal, keep suppressing scroll
+      if (isHorizontal) e.preventDefault()
+      return
+    }
+
+    const dx = Math.abs(e.touches[0].clientX - startX)
+    const dy = Math.abs(e.touches[0].clientY - startY)
+
+    // Need at least 6px movement before deciding axis
+    if (dx < 6 && dy < 6) return
+
+    axisLocked   = true
+    isHorizontal = dx > dy * 1.2  // slightly relaxed ratio for early detection
+
+    if (isHorizontal) {
+      // Lock axis immediately — prevents any vertical movement during swipe
+      e.preventDefault()
+    }
   }
 
   function onTouchEnd(e) {
     if (locked) return
+    if (!isHorizontal) return  // was a vertical scroll — ignore
     if (e.changedTouches.length !== 1) return
 
-    // Only active on the 4 main tab pages
     const idx = TAB_INDEX[route.path]
     if (idx === undefined) return
 
@@ -40,16 +65,13 @@ export function useSwipeNav() {
     const dy = e.changedTouches[0].clientY - startY
     const dt = Date.now() - startTime
 
-    if (Math.abs(dx) < MIN_DX)               return  // too short
-    if (Math.abs(dx) < Math.abs(dy) * H_RATIO) return  // too diagonal
-    if (dt > MAX_DT)                         return  // too slow
-
-    const goBack    = dx > 0  // swiped right → previous tab
-    const goForward = dx < 0  // swiped left  → next tab
+    if (Math.abs(dx) < MIN_DX)                return
+    if (Math.abs(dx) < Math.abs(dy) * H_RATIO) return
+    if (dt > MAX_DT)                           return
 
     locked = true
 
-    if (goBack) {
+    if (dx > 0) {
       slideDirection.value = 'slide-right'
       router.push(SWIPE_TABS[(idx - 1 + SWIPE_TABS.length) % SWIPE_TABS.length])
     } else {
@@ -58,11 +80,10 @@ export function useSwipeNav() {
     }
   }
 
-  // Called by App.vue after the enter transition completes
   function unlock() {
     locked = false
     slideDirection.value = ''
   }
 
-  return { onTouchStart, onTouchEnd, unlock }
+  return { onTouchStart, onTouchMove, onTouchEnd, unlock }
 }
