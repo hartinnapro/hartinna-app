@@ -119,37 +119,39 @@ function navigate(item) {
   transition: background 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Gel button — dark base + bright white gloss on top half */
+/* 3D gel button — light source from above */
 .pill-tab.active {
   position: relative;
   overflow: hidden;
   background: linear-gradient(
     180deg,
-    #d4246a 0%,
-    #b01d58 45%,
-    #8e1647 100%
+    #f575a0 0%,
+    #e0347a 30%,
+    #c0265e 70%,
+    #9e1a4e 100%
   );
   box-shadow:
-    0 5px 20px rgba(212, 39, 108, 0.50),
-    inset 0 2px 0 rgba(255, 255, 255, 0.40),
-    inset 0 -3px 8px rgba(0, 0, 0, 0.15);
+    0 6px 22px rgba(130, 15, 60, 0.55),
+    0 2px 5px  rgba(130, 15, 60, 0.35),
+    inset 0  2px 3px rgba(255, 255, 255, 0.55),
+    inset 0 -5px 10px rgba(0,   0,   0,   0.28);
 }
 
-/* Bright oval gloss — covers top ~42%, nearly white at peak */
+/* Oval specular highlight — the convex surface catching the light */
 .pill-tab.active::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 8%;
-  right: 8%;
-  height: 42%;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.88) 0%,
-    rgba(255, 255, 255, 0.52) 45%,
-    rgba(255, 255, 255, 0.00) 100%
+  top: 2px;
+  left: 10%;
+  right: 10%;
+  height: 44%;
+  background: radial-gradient(
+    ellipse at 50% 10%,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(255, 255, 255, 0.55) 40%,
+    rgba(255, 255, 255, 0.00) 80%
   );
-  border-radius: 50% 50% 60% 60% / 40px 40px 30px 30px;
+  border-radius: 50%;
   pointer-events: none;
 }
 
