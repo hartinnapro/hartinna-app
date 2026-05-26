@@ -1,11 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { supabase } from '@/lib/supabase'
+import { hppGetCache } from '@/lib/cache'
 
 export const useCartStore = defineStore('cart', () => {
-  const items        = ref({})    // { [productId]: { product, qty } }
-  const cartLoading  = ref(false) // true while initRemote is in flight
-  const remoteSynced = ref(false) // true once the first remote load completed
+  const items        = ref({})
+  const cartLoading  = ref(false)
+  const remoteSynced = ref(false)
   let uid = null
 
   // ── Computed ─────────────────────────────────────────────────────────────
@@ -28,19 +29,25 @@ export const useCartStore = defineStore('cart', () => {
     catch {}
   }
 
-  // ── Remote fire-and-forget ────────────────────────────────────────────────
-  async function pushItem(productId, qty) {
+  // ── Remote push (fire-and-forget) ─────────────────────────────────────────
+  // product is stored as a snapshot so other devices can restore the full
+  // cart item without querying the products table at all.
+  async function pushItem(productId, qty, product = null) {
     if (!uid) return
     try {
       if (qty <= 0) {
         await supabase.from('cart_items')
           .delete().eq('member_id', uid).eq('product_id', productId)
       } else {
-        await supabase.from('cart_items').upsert(
-          { member_id: uid, product_id: productId, qty,
-            updated_at: new Date().toISOString() },
-          { onConflict: 'member_id,product_id' }
-        )
+        const row = {
+          member_id:        uid,
+          product_id:       productId,
+          qty,
+          updated_at:       new Date().toISOString(),
+          product_snapshot: product ?? null
+        }
+        await supabase.from('cart_items')
+          .upsert(row, { onConflict: 'member_id,product_id' })
       }
     } catch (e) {
       console.warn('[cart] push failed:', e?.message)
@@ -48,74 +55,68 @@ export const useCartStore = defineStore('cart', () => {
   }
 
   // ── Remote init ───────────────────────────────────────────────────────────
-  // Called on INITIAL_SESSION, SIGNED_IN, and TOKEN_REFRESHED.
-  // Guard: skips if already synced for the same user so the second
-  // TOKEN_REFRESHED event (which fires after every auto-refresh) doesn't
-  // re-fetch the whole catalogue unnecessarily.
+  // Reads cart_items rows directly — no products table join needed.
+  // product_snapshot carries the full product object written by the device
+  // that originally added the item. Falls back to the local HomeView cache
+  // for rows that were inserted before this change (no snapshot yet).
   async function initRemote(userId) {
     if (remoteSynced.value && uid === userId) return
-
     uid = userId
-    load()            // instant local render while remote loads
+    load()
     cartLoading.value = true
 
     try {
       const { data: rows, error } = await supabase
         .from('cart_items')
-        .select('product_id, qty')
+        .select('product_id, qty, product_snapshot')
         .eq('member_id', userId)
 
       if (error) throw error
 
       if (!rows?.length) {
-        // No remote cart yet — push any local items up (offline additions)
+        // Nothing remote yet — push local items up with their snapshots
         for (const [pid, item] of Object.entries(items.value)) {
-          await pushItem(pid, item.qty)
+          await pushItem(pid, item.qty, item.product)
         }
         remoteSynced.value = true
         return
       }
 
-      const ids = rows.map(r => r.product_id)
-
-      // Match HomeView's exact query — member_level is NOT a column in
-      // product_prices. RLS handles tier filtering via the member's JWT.
-      const { data: products } = await supabase
-        .from('products')
-        .select('id, sku, name, image_url, product_prices(price, min_qty)')
-        .in('id', ids)
-        .eq('is_active', true)
-        .is('deleted_at', null)
-
-      if (!products) {
-        remoteSynced.value = true
-        return
-      }
-
-      const pMap = Object.fromEntries(products.map(p => [p.id, p]))
-
-      // Remote is authoritative. Local-only items (added offline) are kept
-      // and queued for upload.
-      const localOnly = Object.entries(items.value)
-        .filter(([pid]) => !ids.includes(pid))
+      // Build the cart from snapshots.
+      // For legacy rows without a snapshot, try the HomeView product cache
+      // (the user has almost certainly browsed the catalogue on this device).
+      const homeCache = hppGetCache(`hpp_home_${userId}`)
+      const cachedProducts = Object.fromEntries(
+        (homeCache?.products ?? []).map(p => [p.id, p])
+      )
 
       const merged = {}
       for (const row of rows) {
-        const product = pMap[row.product_id]
-        if (product) merged[row.product_id] = { product, qty: row.qty }
-      }
-      for (const [pid, item] of localOnly) {
-        if (pMap[pid]) {
-          merged[pid] = { product: pMap[pid], qty: item.qty }
-          pushItem(pid, item.qty)
+        const product = row.product_snapshot ?? cachedProducts[row.product_id]
+        if (product) {
+          merged[row.product_id] = { product, qty: row.qty }
+          // Backfill the snapshot for rows that didn't have one
+          if (!row.product_snapshot && product) {
+            pushItem(row.product_id, row.qty, product)
+          }
         }
       }
 
-      items.value = merged
-      save()
+      // Merge in any local-only items (added offline)
+      for (const [pid, item] of Object.entries(items.value)) {
+        if (!merged[pid]) {
+          merged[pid] = item
+          pushItem(pid, item.qty, item.product)
+        }
+      }
+
+      if (Object.keys(merged).length > 0) {
+        items.value = merged
+        save()
+      }
       remoteSynced.value = true
     } catch (e) {
-      console.warn('[cart] initRemote failed — using local cart:', e?.message)
+      console.warn('[cart] initRemote failed:', e?.message)
     } finally {
       cartLoading.value = false
     }
@@ -125,12 +126,12 @@ export const useCartStore = defineStore('cart', () => {
   function setQty(product, qty) {
     if (qty <= 0) { remove(product.id); return }
     items.value = { ...items.value, [product.id]: { product, qty } }
-    save(); pushItem(product.id, qty)
+    save(); pushItem(product.id, qty, product)
   }
 
   function addToCart(product, qty) {
     items.value = { ...items.value, [product.id]: { product, qty } }
-    save(); pushItem(product.id, qty)
+    save(); pushItem(product.id, qty, product)
   }
 
   function remove(productId) {
@@ -149,15 +150,18 @@ export const useCartStore = defineStore('cart', () => {
   }
 
   function signOut() {
-    items.value = {}; localStorage.removeItem('hpp_cart')
-    uid = null; remoteSynced.value = false
+    items.value = {}
+    localStorage.removeItem('hpp_cart')
+    uid = null
+    remoteSynced.value = false
   }
 
   function updateQty(productId, qty) {
     if (!items.value[productId]) return
     if (qty <= 0) { remove(productId); return }
+    const product = items.value[productId].product
     items.value = { ...items.value, [productId]: { ...items.value[productId], qty } }
-    save(); pushItem(productId, qty)
+    save(); pushItem(productId, qty, product)
   }
 
   function getQty(productId) { return items.value[productId]?.qty ?? 0 }
