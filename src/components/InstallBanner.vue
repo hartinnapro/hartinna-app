@@ -130,12 +130,14 @@ defineExpose({ open: () => { visible.value = true } })
   margin: 0 auto;
   background: white;
   border-radius: 24px 24px 0 0;
-  padding: 28px 24px 40px;
+  padding: 28px 24px calc(40px + env(safe-area-inset-bottom, 16px));
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   box-shadow: 0 -8px 40px rgba(212, 39, 108, 0.18);
+  max-height: 90dvh;
+  overflow-y: auto;
 }
 
 /* ── Icon ─────────────────────────────────────────────── */
