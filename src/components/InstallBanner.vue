@@ -30,10 +30,15 @@
           <button class="btn-later" @click="close">Maybe Later</button>
         </template>
 
-        <!-- ── iOS: manual steps ─────────────────────────── -->
-        <template v-else-if="showIosPrompt">
+        <!-- ── iOS Safari + all other browsers: manual steps ── -->
+        <template v-else>
           <p class="install-desc">
-            Follow these steps in Safari to add Hartinna Partner to your home screen:
+            <template v-if="isIos">
+              Follow these steps in Safari to add Hartinna Partner to your home screen:
+            </template>
+            <template v-else>
+              Open this page in your phone's browser, then follow these steps to install:
+            </template>
           </p>
           <div class="ios-steps">
             <div class="ios-step">
@@ -45,12 +50,12 @@
                   <polyline points="16 6 12 2 8 6"/>
                   <line x1="12" y1="2" x2="12" y2="15"/>
                 </svg>
-                button at the bottom of Safari
+                button at the bottom of your browser
               </span>
             </div>
             <div class="ios-step">
               <span class="step-num">2</span>
-              <span>Scroll down and tap <strong>Add to Home Screen</strong></span>
+              <span>Tap <strong>Add to Home Screen</strong></span>
             </div>
             <div class="ios-step">
               <span class="step-num">3</span>
@@ -58,7 +63,7 @@
             </div>
           </div>
           <button class="btn-install" @click="close">Got It</button>
-          <button class="btn-later" @click="close">Maybe Later</button>
+          <button class="btn-later" @click="close">Close</button>
         </template>
 
       </div>
