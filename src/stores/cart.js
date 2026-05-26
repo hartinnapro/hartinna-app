@@ -13,7 +13,13 @@ export const useCartStore = defineStore('cart', () => {
   const cartCount  = computed(() =>
     Object.values(items.value).reduce((s, i) => s + i.qty, 0)
   )
-  const cartList   = computed(() => Object.values(items.value))
+  // Always sorted newest-updated first — consistent between local edits
+  // and remote loads (both use the same updated_at timestamp source).
+  const cartList   = computed(() =>
+    Object.values(items.value).sort((a, b) =>
+      new Date(b.updated_at ?? 0) - new Date(a.updated_at ?? 0)
+    )
+  )
   const grandTotal = computed(() =>
     cartList.value.reduce((s, i) =>
       s + (i.product.product_prices?.[0]?.price ?? 0) * i.qty, 0)
@@ -68,8 +74,9 @@ export const useCartStore = defineStore('cart', () => {
     try {
       const { data: rows, error } = await supabase
         .from('cart_items')
-        .select('product_id, qty, product_snapshot')
+        .select('product_id, qty, product_snapshot, updated_at')
         .eq('member_id', userId)
+        .order('updated_at', { ascending: false })
 
       if (error) throw error
 
@@ -94,7 +101,7 @@ export const useCartStore = defineStore('cart', () => {
       for (const row of rows) {
         const product = row.product_snapshot ?? cachedProducts[row.product_id]
         if (product) {
-          merged[row.product_id] = { product, qty: row.qty }
+          merged[row.product_id] = { product, qty: row.qty, updated_at: row.updated_at }
           // Backfill the snapshot for rows that didn't have one
           if (!row.product_snapshot && product) {
             pushItem(row.product_id, row.qty, product)
@@ -125,12 +132,14 @@ export const useCartStore = defineStore('cart', () => {
   // ── Mutations ─────────────────────────────────────────────────────────────
   function setQty(product, qty) {
     if (qty <= 0) { remove(product.id); return }
-    items.value = { ...items.value, [product.id]: { product, qty } }
+    const updated_at = new Date().toISOString()
+    items.value = { ...items.value, [product.id]: { product, qty, updated_at } }
     save(); pushItem(product.id, qty, product)
   }
 
   function addToCart(product, qty) {
-    items.value = { ...items.value, [product.id]: { product, qty } }
+    const updated_at = new Date().toISOString()
+    items.value = { ...items.value, [product.id]: { product, qty, updated_at } }
     save(); pushItem(product.id, qty, product)
   }
 
@@ -159,8 +168,9 @@ export const useCartStore = defineStore('cart', () => {
   function updateQty(productId, qty) {
     if (!items.value[productId]) return
     if (qty <= 0) { remove(productId); return }
-    const product = items.value[productId].product
-    items.value = { ...items.value, [productId]: { ...items.value[productId], qty } }
+    const product    = items.value[productId].product
+    const updated_at = new Date().toISOString()
+    items.value = { ...items.value, [productId]: { product, qty, updated_at } }
     save(); pushItem(productId, qty, product)
   }
 
