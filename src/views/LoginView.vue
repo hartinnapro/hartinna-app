@@ -634,30 +634,12 @@ async function doRegister() {
 </script>
 
 <style>
-/* Aurora on html — NOT on .page. Having a continuous CSS animation on the
-   flex container that wraps inputs blocks keyboard focus on iOS WKWebView
-   standalone mode. Keeping the animation on the root html element avoids
-   this while still painting the aurora across the full viewport.
-   Body background matches the aurora base colour to reduce overscroll contrast. */
-
-html.aurora-bg {
-  background: #FEF2F8;
-  background-image:
-    radial-gradient(ellipse at 20% 20%, rgba(255,210,235,0.9) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 80%, rgba(230,100,160,0.3) 0%, transparent 50%),
-    radial-gradient(ellipse at 60% 10%, rgba(245,190,235,0.55) 0%, transparent 45%),
-    radial-gradient(ellipse at 10% 80%, rgba(255,225,242,0.7) 0%, transparent 45%);
-  background-size: 200% 200%;
-  animation: aurora-shift 12s ease-in-out infinite;
-}
-
-html.aurora-bg body {
-  background-color: #FEF2F8;
-  background-image: none;
-  animation: none;
-  max-width: none;
-}
-
+/* html/body: colour fallback for overscroll zone only.
+   Aurora animation lives on .page (directly behind the glass card)
+   so backdrop-filter captures the moving gradient. No overflow on
+   .page so the iOS keyboard issue does NOT return. */
+html.aurora-bg { background: #FEF2F8; }
+html.aurora-bg body { background-color: #FEF2F8; background-image: none; animation: none; max-width: none; }
 @keyframes aurora-shift {
   0%   { background-position: 0% 50%; }
   25%  { background-position: 100% 0%; }
@@ -709,7 +691,14 @@ html.aurora-bg body {
 
 .page {
   font-family: 'DM Sans', sans-serif;
-  background: transparent;
+  background: #FEF2F8;
+  background-image:
+    radial-gradient(ellipse at 20% 20%, rgba(255,210,235,0.9) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(230,100,160,0.3) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 10%, rgba(245,190,235,0.55) 0%, transparent 45%),
+    radial-gradient(ellipse at 10% 80%, rgba(255,225,242,0.7) 0%, transparent 45%);
+  background-size: 200% 200%;
+  animation: aurora-shift 12s ease-in-out infinite;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
