@@ -78,12 +78,14 @@ export const useCartStore = defineStore('cart', () => {
 
       const ids = rows.map(r => r.product_id)
 
-      // RLS on product_prices automatically returns only this member's tier.
+      // Match HomeView's exact query — member_level is NOT a column in
+      // product_prices. RLS handles tier filtering via the member's JWT.
       const { data: products } = await supabase
         .from('products')
-        .select('id, name, sku, image_url, product_prices(price, member_level)')
+        .select('id, sku, name, image_url, product_prices(price, min_qty)')
         .in('id', ids)
         .eq('is_active', true)
+        .is('deleted_at', null)
 
       if (!products) {
         remoteSynced.value = true
