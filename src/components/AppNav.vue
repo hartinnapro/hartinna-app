@@ -119,38 +119,37 @@ function navigate(item) {
   transition: background 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Option A — Simulated glass: diagonal gradient + gloss pseudo-element.
-   No backdrop-filter needed — works identically on every platform. */
+/* Gel button — dark base + bright white gloss on top half */
 .pill-tab.active {
   position: relative;
   overflow: hidden;
   background: linear-gradient(
-    170deg,
-    #e8357a 0%,
-    #D4276C 55%,
-    #a81e57 100%
+    180deg,
+    #d4246a 0%,
+    #b01d58 45%,
+    #8e1647 100%
   );
   box-shadow:
-    0 4px 18px rgba(212, 39, 108, 0.45),
-    inset 0 2px 0 rgba(255, 255, 255, 0.55),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.10);
+    0 5px 20px rgba(212, 39, 108, 0.50),
+    inset 0 2px 0 rgba(255, 255, 255, 0.40),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* White gloss sweep — top 48% only, hard stop at midpoint */
+/* Bright oval gloss — covers top ~42%, nearly white at peak */
 .pill-tab.active::before {
   content: '';
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
-  height: 48%;
+  left: 8%;
+  right: 8%;
+  height: 42%;
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.62) 0%,
-    rgba(255, 255, 255, 0.22) 65%,
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(255, 255, 255, 0.52) 45%,
     rgba(255, 255, 255, 0.00) 100%
   );
-  border-radius: 40px 40px 0 0;
+  border-radius: 50% 50% 60% 60% / 40px 40px 30px 30px;
   pointer-events: none;
 }
 
