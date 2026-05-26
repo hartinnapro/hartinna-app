@@ -631,39 +631,20 @@ async function doRegister() {
 </script>
 
 <style>
-/* Global — aurora rendered in a position:fixed pseudo-element so it always
-   covers the viewport regardless of scroll position.
-   overscroll-behavior-y:none prevents the system overscroll zone from
-   showing a different colour when the user scrolls past page boundaries. */
+/* html + body: matching background so iOS overscroll zone shows the same
+   base pink as the aurora rather than white. overflow:hidden was tried to
+   eliminate the overscroll bar but breaks the iOS PWA keyboard — WKWebView
+   standalone can't scroll focused inputs into view when no ancestor scrolls. */
 
 html.aurora-bg {
   background: #FEF2F8;
-  overscroll-behavior-y: none;
 }
 
 html.aurora-bg body {
-  /* Solid colour — NOT transparent — so Android Chrome overscroll zone
-     matches the aurora instead of showing white or a system default. */
   background-color: #FEF2F8;
   background-image: none;
   animation: none;
   max-width: none;
-  overscroll-behavior-y: none;
-}
-
-html.aurora-bg::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background: #FEF2F8;
-  background-image:
-    radial-gradient(ellipse at 20% 20%, rgba(255,210,235,0.9) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 80%, rgba(230,100,160,0.3) 0%, transparent 50%),
-    radial-gradient(ellipse at 60% 10%, rgba(245,190,235,0.55) 0%, transparent 45%),
-    radial-gradient(ellipse at 10% 80%, rgba(255,225,242,0.7) 0%, transparent 45%);
-  background-size: 200% 200%;
-  animation: aurora-shift 12s ease-in-out infinite;
 }
 
 @keyframes aurora-shift {
@@ -717,8 +698,23 @@ html.aurora-bg::before {
 
 .page {
   font-family: 'DM Sans', sans-serif;
-  background: transparent;
+
+  /* Normal document flow — required for iOS PWA keyboard to work.
+     overflow-y:auto on .page with overflow:hidden on html/body was
+     breaking WKWebView standalone keyboard input. */
   min-height: 100dvh;
+
+  /* Aurora on the page element so it fills the full scroll height */
+  background: #FEF2F8;
+  background-image:
+    radial-gradient(ellipse at 20% 20%, rgba(255,210,235,0.9) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(230,100,160,0.3) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 10%, rgba(245,190,235,0.55) 0%, transparent 45%),
+    radial-gradient(ellipse at 10% 80%, rgba(255,225,242,0.7) 0%, transparent 45%);
+  background-size: 200% 200%;
+  background-repeat: no-repeat;
+  animation: aurora-shift 12s ease-in-out infinite;
+
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -727,6 +723,7 @@ html.aurora-bg::before {
   width: 100%;
   max-width: 480px;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 /* ── Shimmer aurora ──────────────────────────────────────────────────────── */
