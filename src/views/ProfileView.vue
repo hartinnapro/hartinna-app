@@ -186,6 +186,8 @@ async function uploadAvatar(e) {
   if (!error) {
     const { data } = supabase.storage.from('member-avatars').getPublicUrl(path)
     avatarUrl.value = data.publicUrl + '?t=' + Date.now()
+    // Mark flag so future loads skip the storage probe
+    await supabase.from('members').update({ has_avatar: true }).eq('id', session.user.id)
   }
 }
 
@@ -219,19 +221,17 @@ onMounted(async () => {
     state.value = 'ready'
   }
 
-  const { data: avatarData } = supabase.storage.from('member-avatars').getPublicUrl(`${uid}/avatar.jpg`)
-  const candidateUrl = avatarData.publicUrl + '?t=' + Date.now()
-  try {
-    const res = await fetch(candidateUrl, { method: 'HEAD' })
-    if (res.ok && res.headers.get('content-type')?.startsWith('image/')) {
-      avatarUrl.value = candidateUrl
-    }
-  } catch { /* leave null, fallback shows */ }
+  // Only attempt to load avatar when the flag is set — avoids 400 console
+  // noise from probing storage for members who never uploaded a photo.
 
   const [{ data:m }, { data:orderData }] = await Promise.all([
-    supabase.from('members').select('full_name,phone,region,level').eq('id',uid).single(),
+    supabase.from('members').select('full_name,phone,region,level,has_avatar').eq('id',uid).single(),
     supabase.from('orders').select('status,total_amount').eq('member_id',uid).neq('status','cancelled')
   ])
+  if (m?.has_avatar) {
+    const { data: avatarData } = supabase.storage.from('member-avatars').getPublicUrl(`${uid}/avatar.jpg`)
+    avatarUrl.value = avatarData.publicUrl + '?t=' + Date.now()
+  }
   const freshStats = { total:0, completed:0, spent:'0' }
   if (orderData) {
     freshStats.total = orderData.length
