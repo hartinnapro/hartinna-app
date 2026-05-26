@@ -24,6 +24,7 @@
 import { computed, h } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
+import { slideDirection } from '@/composables/useSwipeNav'
 
 const router = useRouter()
 const route  = useRoute()
@@ -58,12 +59,21 @@ const items = [
   { label: 'Profile', route: '/profile', icon: IconProfile },
 ]
 
+const TAB_INDEX = Object.fromEntries(items.map((t, i) => [t.route, i]))
+
 function isActive(item) {
   return route.path === item.route || route.path.startsWith(item.route + '/')
 }
 
 function navigate(item) {
-  if (!isActive(item)) router.push(item.route)
+  if (isActive(item)) return
+  // Set slide direction so App.vue transition matches tap direction
+  const from = TAB_INDEX[route.path] ?? -1
+  const to   = TAB_INDEX[item.route] ?? -1
+  if (from !== -1 && to !== -1) {
+    slideDirection.value = to > from ? 'slide-left' : 'slide-right'
+  }
+  router.push(item.route)
 }
 </script>
 
