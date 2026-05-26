@@ -136,14 +136,15 @@ function navigate(item) {
     inset 0 -1px 0 rgba(0, 0, 0, 0.08);
 }
 
-/* White gloss sweep — top half only, mimics light catching curved glass */
+/* White gloss sweep — top portion, mimics light catching curved glass */
 .pill-tab.active::before {
   content: '';
   position: absolute;
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.24) 0%,
+    rgba(255, 255, 255, 0.42) 0%,
+    rgba(255, 255, 255, 0.18) 38%,
     rgba(255, 255, 255, 0.00) 55%
   );
   border-radius: inherit;
