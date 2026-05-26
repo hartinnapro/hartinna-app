@@ -1,24 +1,37 @@
 <script setup>
-import { useWakeLock } from '@/composables/useWakeLock'
-import { computed, watch } from 'vue'
+import { onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { useWakeLock } from '@/composables/useWakeLock'
+import { useCartStore } from '@/stores/cart'
+import { supabase } from '@/lib/supabase'
 import AppNav from '@/components/AppNav.vue'
 
 useWakeLock()
 
 const route = useRoute()
+const cart  = useCartStore()
 
-// Pages that show the bottom navigation. Listed centrally so AppNav can be
-// rendered ONCE in App.vue (persistent across navigation) instead of inside
-// each view — prevents nav flicker/jump during page transitions.
+// Load local cart immediately on app boot so the badge count
+// is visible before auth resolves.
+cart.load()
+
+// Sync cart with Supabase whenever auth state is known.
+// INITIAL_SESSION fires on first load; SIGNED_IN fires after login.
+onMounted(() => {
+  supabase.auth.onAuthStateChange((event, session) => {
+    if ((event === 'INITIAL_SESSION' || event === 'SIGNED_IN') && session) {
+      cart.initRemote(session.user.id)
+    } else if (event === 'SIGNED_OUT') {
+      cart.signOut()
+    }
+  })
+})
+
 const NAV_PATHS = ['/home', '/cart', '/orders', '/profile', '/payment']
 const showNav = computed(() =>
   NAV_PATHS.some(p => route.path === p || route.path.startsWith(p + '/'))
 )
 
-// Mirror showNav onto an html class so variables.css can draw the bottom
-// gradient full window width (Windows PWA fix). See variables.css for
-// `.has-bottom-nav` rules.
 watch(showNav, (show) => {
   document.documentElement.classList.toggle('has-bottom-nav', show)
 }, { immediate: true })
