@@ -125,29 +125,32 @@ function navigate(item) {
   position: relative;
   overflow: hidden;
   background: linear-gradient(
-    135deg,
-    #e8387a 0%,
-    #D4276C 45%,
-    #b81f5a 100%
+    170deg,
+    #e8357a 0%,
+    #D4276C 55%,
+    #a81e57 100%
   );
   box-shadow:
-    0 3px 16px rgba(212, 39, 108, 0.40),
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.50),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.08);
+    0 4px 18px rgba(212, 39, 108, 0.45),
+    inset 0 2px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.10);
 }
 
-/* White gloss sweep — top portion, mimics light catching curved glass */
+/* White gloss sweep — top 48% only, hard stop at midpoint */
 .pill-tab.active::before {
   content: '';
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48%;
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.42) 0%,
-    rgba(255, 255, 255, 0.18) 38%,
-    rgba(255, 255, 255, 0.00) 55%
+    rgba(255, 255, 255, 0.62) 0%,
+    rgba(255, 255, 255, 0.22) 65%,
+    rgba(255, 255, 255, 0.00) 100%
   );
-  border-radius: inherit;
+  border-radius: 40px 40px 0 0;
   pointer-events: none;
 }
 
