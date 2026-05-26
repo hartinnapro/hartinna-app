@@ -799,16 +799,18 @@ html.aurora-bg body {
 /* ── Card ────────────────────────────────────────────────────────────────── */
 .card {
   width: 90%;
-  background: rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(32px) saturate(1.6);
+  -webkit-backdrop-filter: blur(32px) saturate(1.6);
   border-radius: var(--radius);
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.65);
   box-shadow:
-    0 8px 32px rgba(212, 39, 108, 0.10),
-    0 2px 8px  rgba(212, 39, 108, 0.06),
-    inset 0  1px 0 rgba(255, 255, 255, 0.80),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.30);
+    0 12px 40px rgba(212, 39, 108, 0.15),
+    0 2px 8px   rgba(212, 39, 108, 0.08),
+    inset 0  1px 0 rgba(255, 255, 255, 0.90),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.40),
+    inset  1px 0 0 rgba(255, 255, 255, 0.55),
+    inset -1px 0 0 rgba(255, 255, 255, 0.55);
   padding: 30px 24px 24px;
 }
 .card-title    { font-family: 'Playfair Display', Georgia, serif; font-size: 21px; color: var(--text); margin-bottom: 5px; }
