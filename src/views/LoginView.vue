@@ -631,9 +631,28 @@ async function doRegister() {
 </script>
 
 <style>
-/* Global — html carries the aurora so it covers the full viewport seamlessly */
-html.aurora-bg,
+/* Global — aurora rendered in a position:fixed pseudo-element so it always
+   covers the viewport regardless of scroll position. This prevents the
+   "different-tone bar" that appears when the browser toolbar slides away
+   and reveals a different part of the scrolling gradient.
+   (background-attachment:fixed is intentionally avoided — it's broken on iOS) */
+
+html.aurora-bg {
+  background: #FEF2F8; /* solid fallback in case ::before is unavailable */
+}
+
 html.aurora-bg body {
+  background-color: transparent;
+  background-image: none;
+  animation: none;
+  max-width: none;
+}
+
+html.aurora-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
   background: #FEF2F8;
   background-image:
     radial-gradient(ellipse at 20% 20%, rgba(255,210,235,0.9) 0%, transparent 50%),
@@ -642,13 +661,6 @@ html.aurora-bg body {
     radial-gradient(ellipse at 10% 80%, rgba(255,225,242,0.7) 0%, transparent 45%);
   background-size: 200% 200%;
   animation: aurora-shift 12s ease-in-out infinite;
-}
-
-html.aurora-bg body {
-  background-color: transparent;
-  background-image: none;
-  animation: none;
-  max-width: none;
 }
 
 @keyframes aurora-shift {
