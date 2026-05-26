@@ -56,7 +56,7 @@ watch(showNav, show => {
 
 <style>
 .page-leave-active { transition: opacity 0.14s ease-in; }
-.page-enter-active { transition: opacity 0.22s ease-out, transform 0.22s ease-out; }
-.page-enter-from   { opacity: 0; transform: translateY(6px); }
+.page-enter-active { transition: opacity 0.22s ease-out; }
+.page-enter-from   { opacity: 0; }
 .page-leave-to     { opacity: 0; }
 </style>
