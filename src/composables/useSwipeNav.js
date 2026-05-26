@@ -17,8 +17,8 @@ export function useSwipeNav() {
   const route  = useRoute()
 
   let startX = 0, startY = 0, startTime = 0
-  let axisLocked = false   // true once we've committed to horizontal
-  let isHorizontal = false // determined during touchmove
+  let axisLocked   = false
+  let isHorizontal = false
 
   function onTouchStart(e) {
     if (e.touches.length !== 1) return
@@ -29,33 +29,28 @@ export function useSwipeNav() {
     isHorizontal = false
   }
 
-  // Non-passive: allows preventDefault() to stop vertical scroll jitter on iOS
+  // Non-passive: allows preventDefault() to stop iOS vertical jitter during swipes
   function onTouchMove(e) {
     if (e.touches.length !== 1) return
-    if (axisLocked) {
-      // Axis already determined — if horizontal, keep suppressing scroll
-      if (isHorizontal) e.preventDefault()
-      return
-    }
 
     const dx = Math.abs(e.touches[0].clientX - startX)
     const dy = Math.abs(e.touches[0].clientY - startY)
 
-    // Need at least 6px movement before deciding axis
+    if (axisLocked) {
+      if (isHorizontal) e.preventDefault()
+      return
+    }
+
     if (dx < 6 && dy < 6) return
 
     axisLocked   = true
-    isHorizontal = dx > dy * 1.2  // slightly relaxed ratio for early detection
+    isHorizontal = dx > dy * 1.2
 
-    if (isHorizontal) {
-      // Lock axis immediately — prevents any vertical movement during swipe
-      e.preventDefault()
-    }
+    if (isHorizontal) e.preventDefault()
   }
 
   function onTouchEnd(e) {
-    if (locked) return
-    if (!isHorizontal) return  // was a vertical scroll — ignore
+    if (locked || !isHorizontal) return
     if (e.changedTouches.length !== 1) return
 
     const idx = TAB_INDEX[route.path]
@@ -70,7 +65,6 @@ export function useSwipeNav() {
     if (dt > MAX_DT)                           return
 
     locked = true
-
     if (dx > 0) {
       slideDirection.value = 'slide-right'
       router.push(SWIPE_TABS[(idx - 1 + SWIPE_TABS.length) % SWIPE_TABS.length])
