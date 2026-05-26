@@ -473,6 +473,14 @@ const states = [
 onMounted(async () => {
   document.documentElement.classList.add('aurora-bg')
 
+  // Pre-fill email BEFORE any await — if this runs after getSession() resolves,
+  // the reactive v-model update fires while iOS is animating the keyboard open
+  // and cancels it (Paste/AutoFill appears but keyboard never shows on iOS PWA).
+  try {
+    const last = localStorage.getItem('hpp_last_email')
+    if (last) L.email = last
+  } catch {}
+
   // Auto-redirect if already logged in
   try {
     const { data: { session } } = await supabase.auth.getSession()
@@ -483,11 +491,6 @@ onMounted(async () => {
         return
       }
     }
-  } catch {}
-
-  try {
-    const last = localStorage.getItem('hpp_last_email')
-    if (last) L.email = last
   } catch {}
 })
 
