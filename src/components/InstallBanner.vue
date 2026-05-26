@@ -1,20 +1,46 @@
 <template>
   <Transition name="install-slide">
-    <div v-if="visible" class="install-overlay" @click.self="close">
+    <div v-if="visible" class="install-overlay" @click.self="!installing && close()">
       <div class="install-sheet">
 
-        <!-- ── Icon ─────────────────────────────────────── -->
-        <div class="install-icon-wrap">
-          <svg width="28" height="28" fill="none" stroke="white" stroke-width="1.8" viewBox="0 0 24 24">
-            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
-            <line x1="12" y1="18" x2="12" y2="18" stroke-width="2.5" stroke-linecap="round"/>
-          </svg>
-        </div>
+        <!-- ── Success state ─────────────────────────────── -->
+        <template v-if="installed">
+          <div class="success-icon-wrap">
+            <svg width="32" height="32" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <div class="install-title">App Installed!</div>
+          <p class="install-desc">Hartinna Partner has been added to your home screen. You can now launch it directly from there.</p>
+          <button class="btn-install" @click="close">
+            Done
+          </button>
+        </template>
 
-        <div class="install-title">Add to Home Screen</div>
+        <!-- ── Installing state ──────────────────────────── -->
+        <template v-else-if="installing">
+          <div class="install-icon-wrap">
+            <svg class="spin" width="28" height="28" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+            </svg>
+          </div>
+          <div class="install-title">Installing…</div>
+          <p class="install-desc">Adding Hartinna Partner to your home screen.</p>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar"></div>
+          </div>
+        </template>
 
         <!-- ── Android: native prompt ───────────────────── -->
-        <template v-if="canInstall">
+        <template v-else-if="canInstall">
+          <div class="install-icon-wrap">
+            <svg width="28" height="28" fill="none" stroke="white" stroke-width="1.8" viewBox="0 0 24 24">
+              <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+              <line x1="12" y1="15" x2="12" y2="8"/>
+              <polyline points="9 12 12 15 15 12"/>
+            </svg>
+          </div>
+          <div class="install-title">Add to Home Screen</div>
           <p class="install-desc">
             Install the Hartinna Partner app for the fastest experience —
             works offline and launches like a native app.
@@ -30,22 +56,24 @@
           <button class="btn-later" @click="close">Maybe Later</button>
         </template>
 
-        <!-- ── iOS Safari + all other browsers: manual steps ── -->
+        <!-- ── iOS / fallback: manual steps ─────────────── -->
         <template v-else>
+          <div class="install-icon-wrap">
+            <svg width="28" height="28" fill="none" stroke="white" stroke-width="1.8" viewBox="0 0 24 24">
+              <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+              <line x1="12" y1="15" x2="12" y2="8"/>
+              <polyline points="9 12 12 15 15 12"/>
+            </svg>
+          </div>
+          <div class="install-title">Add to Home Screen</div>
           <p class="install-desc">
-            <template v-if="isIos">
-              Follow these steps in Safari to add Hartinna Partner to your home screen:
-            </template>
-            <template v-else>
-              Open this page in your phone's browser, then follow these steps to install:
-            </template>
+            {{ isIos ? 'Follow these steps in Safari:' : 'Open in your phone browser, then:' }}
           </p>
           <div class="ios-steps">
             <div class="ios-step">
               <span class="step-num">1</span>
-              <span>Tap the
-                <strong>Share</strong>
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:-2px;margin:0 2px">
+              <span>Tap the <strong>Share</strong>
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:-2px;margin:0 2px">
                   <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
                   <polyline points="16 6 12 2 8 6"/>
                   <line x1="12" y1="2" x2="12" y2="15"/>
@@ -72,50 +100,59 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useInstallPrompt } from '@/composables/useInstallPrompt'
 
 const props = defineProps({
-  // Pass true from Profile page to force-show (ignores dismissed flag)
   force: { type: Boolean, default: false }
 })
-
 const emit = defineEmits(['close'])
 
-const { canInstall, showIosPrompt, isInstalled, wasDismissed, dismiss, triggerInstall } = useInstallPrompt()
+const { canInstall, isIos, isInstalled, wasDismissed, dismiss, triggerInstall } = useInstallPrompt()
 
-const visible = ref(false)
+const visible   = ref(false)
+const installing = ref(false)
+const installed  = ref(false)
+
+// Listen for Android appinstalled event
+function onAppInstalled() {
+  installing.value = false
+  installed.value  = true
+}
 
 onMounted(() => {
+  window.addEventListener('appinstalled', onAppInstalled)
+
   if (isInstalled) return
-  if (!canInstall.value && !showIosPrompt) return
 
-  if (props.force) {
-    visible.value = true
-    return
-  }
+  if (props.force) { visible.value = true; return }
 
-  // Auto-show after 3 s on first visit (if not dismissed before)
   if (!wasDismissed()) {
     setTimeout(() => { visible.value = true }, 3000)
   }
 })
 
+onUnmounted(() => {
+  window.removeEventListener('appinstalled', onAppInstalled)
+})
+
 function close() {
   dismiss()
-  visible.value = false
+  visible.value    = false
+  installing.value = false
+  installed.value  = false
   emit('close')
 }
 
 async function doInstall() {
+  installing.value = true
   const outcome = await triggerInstall()
-  if (outcome === 'accepted') {
-    visible.value = false
-    emit('close')
+  if (outcome === 'dismissed') {
+    installing.value = false
   }
+  // if 'accepted' → wait for appinstalled event to flip to success state
 }
 
-// Allow parent to trigger it (Profile menu tap)
 defineExpose({ open: () => { visible.value = true } })
 </script>
 
@@ -135,7 +172,7 @@ defineExpose({ open: () => { visible.value = true } })
   margin: 0 auto;
   background: white;
   border-radius: 24px 24px 0 0;
-  padding: 28px 24px calc(40px + env(safe-area-inset-bottom, 16px));
+  padding: 32px 24px calc(44px + env(safe-area-inset-bottom, 16px));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -145,21 +182,34 @@ defineExpose({ open: () => { visible.value = true } })
   overflow-y: auto;
 }
 
-/* ── Icon ─────────────────────────────────────────────── */
+/* ── Icons ────────────────────────────────────────────── */
 .install-icon-wrap {
-  width: 60px;
-  height: 60px;
-  border-radius: 16px;
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
   background: linear-gradient(145deg, #f0588a 0%, #D4276C 50%, #9e1a50 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
   box-shadow: 0 6px 20px rgba(212, 39, 108, 0.35);
 }
 
+.success-icon-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #34c97a, #1e9e58);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  box-shadow: 0 6px 20px rgba(30, 158, 88, 0.35);
+}
+
+/* ── Text ─────────────────────────────────────────────── */
 .install-title {
-  font-size: 18px;
+  font-size: 19px;
   font-weight: 700;
   color: #2c1820;
   margin-bottom: 10px;
@@ -168,9 +218,32 @@ defineExpose({ open: () => { visible.value = true } })
 .install-desc {
   font-size: 14px;
   color: #8a5a6e;
-  line-height: 1.55;
-  margin: 0 0 22px;
+  line-height: 1.6;
+  margin: 0 0 24px;
   max-width: 300px;
+}
+
+/* ── Progress bar ─────────────────────────────────────── */
+.progress-bar-wrap {
+  width: 100%;
+  height: 6px;
+  background: #f5e0eb;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #f0588a, #D4276C);
+  border-radius: 3px;
+  animation: progress-indeterminate 1.4s ease-in-out infinite;
+}
+
+@keyframes progress-indeterminate {
+  0%   { transform: translateX(-100%) scaleX(0.5); }
+  50%  { transform: translateX(0%)    scaleX(0.8); }
+  100% { transform: translateX(100%)  scaleX(0.5); }
 }
 
 /* ── iOS steps ────────────────────────────────────────── */
@@ -178,8 +251,8 @@ defineExpose({ open: () => { visible.value = true } })
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 14px;
+  margin-bottom: 26px;
   text-align: left;
 }
 
@@ -238,14 +311,16 @@ defineExpose({ open: () => { visible.value = true } })
   padding: 8px;
 }
 
+/* ── Spinner ──────────────────────────────────────────── */
+.spin {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
 /* ── Transition ───────────────────────────────────────── */
 .install-slide-enter-active { transition: transform 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.25s ease; }
 .install-slide-leave-active { transition: transform 0.22s ease-in, opacity 0.2s ease-in; }
-.install-slide-enter-from, .install-slide-leave-to {
-  opacity: 0;
-}
+.install-slide-enter-from, .install-slide-leave-to { opacity: 0; }
 .install-slide-enter-from .install-sheet,
-.install-slide-leave-to .install-sheet {
-  transform: translateY(100%);
-}
+.install-slide-leave-to   .install-sheet { transform: translateY(100%); }
 </style>
