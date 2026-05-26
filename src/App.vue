@@ -49,6 +49,7 @@ const SWIPE_PATHS = ['/home', '/cart', '/orders', '/profile']
 
 const showNav     = computed(() => NAV_PATHS.some(p => route.path === p))
 const swipeActive = computed(() => SWIPE_PATHS.includes(route.path))
+const onLoginPage = computed(() => route.path === '/login')
 
 watch(showNav, show => {
   document.documentElement.classList.toggle('has-bottom-nav', show)
@@ -61,6 +62,7 @@ function onAfterEnter() { unlock() }
   <div
     ref="swipeRoot"
     class="swipe-root"
+    :class="{ 'login-bg': onLoginPage }"
     @touchstart.passive="swipeActive ? onTouchStart($event) : undefined"
     @touchend.passive="swipeActive ? onTouchEnd($event) : undefined"
   >
@@ -133,6 +135,8 @@ function onAfterEnter() { unlock() }
   min-height: 100dvh;
   background: var(--bg);
 }
+/* Login page: match the aurora base colour so sides don't show a contrasting bar on wide screens */
+.swipe-root.login-bg { background: #FEF2F8; }
 
 /* ── Default transition: fade ───────────────────────────────────────────── */
 .page-leave-active { transition: opacity 0.14s ease-in; }
