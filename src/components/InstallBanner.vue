@@ -25,10 +25,21 @@
             </svg>
           </div>
           <div class="install-title">Installing…</div>
-          <p class="install-desc">Adding Hartinna Partner to your home screen.</p>
+          <p class="install-desc">
+            {{ readyToConfirm
+              ? 'Check your home screen — can you see the Hartinna Partner icon?'
+              : 'Adding Hartinna Partner to your home screen.' }}
+          </p>
           <div class="progress-bar-wrap">
             <div class="progress-bar"></div>
           </div>
+          <button v-if="readyToConfirm" class="btn-install" @click="confirmInstalled">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            Yes, I can see the icon!
+          </button>
+          <button v-if="readyToConfirm" class="btn-later" @click="confirmInstalled">Skip</button>
         </template>
 
         <!-- ── Android: native prompt ───────────────────── -->
@@ -110,14 +121,23 @@ const emit = defineEmits(['close'])
 
 const { canInstall, isIos, isInstalled, wasDismissed, dismiss, triggerInstall } = useInstallPrompt()
 
-const visible   = ref(false)
-const installing = ref(false)
-const installed  = ref(false)
+const visible         = ref(false)
+const installing      = ref(false)
+const readyToConfirm  = ref(false)   // appinstalled fired — waiting for user to confirm icon appeared
+const installed       = ref(false)
 
-// Listen for Android appinstalled event
+let installStart = 0
+
 function onAppInstalled() {
-  installing.value = false
-  installed.value  = true
+  // Chrome says done — but launcher may still be placing the icon.
+  // Show a confirm button and let the user tell us when they see it.
+  readyToConfirm.value = true
+}
+
+function confirmInstalled() {
+  installing.value     = false
+  readyToConfirm.value = false
+  installed.value      = true
 }
 
 onMounted(() => {
@@ -148,7 +168,7 @@ async function doInstall() {
   if (outcome === 'dismissed') {
     installing.value = false
   }
-  // if 'accepted' → wait for appinstalled event to flip to success state
+  // if 'accepted' → wait for appinstalled → readyToConfirm → user taps confirm → success
 }
 
 defineExpose({ open: () => { visible.value = true } })
