@@ -90,19 +90,12 @@ function navigate(item) {
   align-items: center;
   justify-content: space-around;
 
-  background: rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(28px) saturate(1.8);
-  -webkit-backdrop-filter: blur(28px) saturate(1.8);
-  border: 1px solid rgba(255, 255, 255, 0.65);
+  background: #fff;
+  border: 1px solid rgba(240, 214, 228, 0.7);
   border-radius: 50px;
   padding: 8px 6px;
-  box-shadow:
-    0 8px 32px rgba(212, 39, 108, 0.14),
-    0 2px 8px  rgba(212, 39, 108, 0.08),
-    inset 0  1px 0 rgba(255, 255, 255, 0.90),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.35),
-    inset  1px 0 0 rgba(255, 255, 255, 0.50),
-    inset -1px 0 0 rgba(255, 255, 255, 0.50);
+  box-shadow: 0 4px 20px rgba(212, 39, 108, 0.10),
+              0 1px 4px  rgba(212, 39, 108, 0.06);
 
   z-index: 99;
   pointer-events: none;
@@ -126,10 +119,15 @@ function navigate(item) {
   transition: background 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Glass effect on active tab only — frosted pink over page content */
 .pill-tab.active {
-  background: var(--primary);
-  box-shadow: 0 2px 12px rgba(212, 39, 108, 0.30),
-              inset 0 1px 0 rgba(255, 255, 255, 0.20);
+  background: rgba(212, 39, 108, 0.88);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  box-shadow:
+    0 3px 14px rgba(212, 39, 108, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.30),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.06);
 }
 
 /* ── Icon wrapper (positions badge) ───────────────────────────────────── */
