@@ -70,7 +70,7 @@
           @dragleave="dragOver = false"
           @drop.prevent="onDrop"
         >
-          <input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" @change="onFileSelect" />
+          <input id="payment-proof" name="payment-proof" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" @change="onFileSelect" />
           <div class="upload-icon">
             <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           </div>
