@@ -491,6 +491,7 @@ onMounted(async () => {
     if (session) {
       const keepUntil = localStorage.getItem('hpp_keep_until')
       if (!keepUntil || Date.now() < parseInt(keepUntil)) {
+        window.scrollTo({ top: 0, behavior: 'instant' })
         router.push('/home')
         return
       }
@@ -567,6 +568,7 @@ async function doLogin() {
           localStorage.removeItem('hpp_keep_until')
         }
       } catch {}
+      window.scrollTo({ top: 0, behavior: 'instant' })
       router.push('/home')
     }
   } catch {
@@ -656,7 +658,7 @@ html.aurora-bg body { background-color: #FEF2F8; background-image: none; animati
 <style scoped>
 /* ── PWA launch screen ───────────────────────────────────────────────────── */
 .launch-screen {
-  min-height: 100dvh;
+  min-height: 100svh;
   display: flex; align-items: center; justify-content: center;
   background: #FEF2F8;
 }
@@ -703,7 +705,7 @@ html.aurora-bg body { background-color: #FEF2F8; background-image: none; animati
     radial-gradient(ellipse at 10% 80%, rgba(255,225,242,0.7) 0%, transparent 45%);
   background-size: 200% 200%;
   animation: aurora-shift 12s ease-in-out infinite;
-  min-height: 100dvh;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
   align-items: center;
