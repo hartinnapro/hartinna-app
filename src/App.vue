@@ -40,7 +40,6 @@ watch(showNav, show => {
   document.documentElement.classList.toggle('has-bottom-nav', show)
 }, { immediate: true })
 
-// Clear slide direction once the entering page has settled
 function onAfterEnter() {
   slideDirection.value = ''
 }
@@ -48,10 +47,9 @@ function onAfterEnter() {
 
 <template>
   <!--
-    .swipe-root: position:relative + overflow:hidden lets the slide
-    transition run both pages side-by-side (position:absolute) without
-    either leaking outside the viewport.
-    AppNav is position:fixed so overflow:hidden doesn't clip it.
+    touch-action:pan-y  → tells Android Chrome we own horizontal swipes;
+                          prevents the system back/forward gesture intercepting
+    overscroll-behavior-x:none → stops iOS rubber-band on horizontal drags
   -->
   <div
     class="swipe-root"
@@ -59,8 +57,14 @@ function onAfterEnter() {
     @touchend.passive="onTouchEnd"
   >
     <RouterView v-slot="{ Component, route }">
+      <!--
+        mode="out-in": leaving page animates out FIRST (150ms), then entering
+        page slides in (250ms). No simultaneous position:absolute rendering,
+        no gap/flash, and the 150ms leave phase acts as a natural swipe lock.
+      -->
       <Transition
         :name="slideDirection || 'page'"
+        mode="out-in"
         @after-enter="onAfterEnter"
       >
         <component :is="Component" :key="route.path" />
@@ -71,46 +75,42 @@ function onAfterEnter() {
 </template>
 
 <style>
-/* ── Swipe wrapper ──────────────────────────────────────────────────────── */
 .swipe-root {
   position: relative;
-  overflow: hidden;
   min-height: 100dvh;
+  touch-action: pan-y;           /* Android: we handle horizontal */
+  overscroll-behavior-x: none;   /* iOS: no rubber-band on horizontal drag */
 }
 
-/* ── Default transition: fade only (no transform — iOS keyboard fix) ────── */
+/* ── Default transition: fade ───────────────────────────────────────────── */
 .page-leave-active { transition: opacity 0.14s ease-in; }
 .page-enter-active { transition: opacity 0.18s ease-out; }
 .page-enter-from   { opacity: 0; }
 .page-leave-to     { opacity: 0; }
 
-/* ── Slide LEFT: current exits left, next enters from right ─────────────── */
-/* (user swiped left / tapped a tab to the right)                           */
-.slide-left-leave-active,
+/* ── Slide LEFT (swipe left → next tab enters from right) ───────────────── */
+/* Current page: quick fade-slide left (150ms) */
+.slide-left-leave-active {
+  transition: transform 0.15s ease-in, opacity 0.15s ease-in;
+}
+.slide-left-leave-to { transform: translateX(-18%); opacity: 0; }
+/* New page: slides in from right (250ms) */
 .slide-left-enter-active {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%;
-  will-change: transform;
+  transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
-.slide-left-leave-to   { transform: translateX(-100%); }
-.slide-left-enter-from { transform: translateX(100%);  }
-.slide-left-leave-from,
-.slide-left-enter-to   { transform: translateX(0);     }
+.slide-left-enter-from { transform: translateX(100%); }
+.slide-left-enter-to   { transform: translateX(0); }
 
-/* ── Slide RIGHT: current exits right, next enters from left ────────────── */
-/* (user swiped right / tapped a tab to the left)                           */
-.slide-right-leave-active,
-.slide-right-enter-active {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%;
-  will-change: transform;
+/* ── Slide RIGHT (swipe right → prev tab enters from left) ──────────────── */
+/* Current page: quick fade-slide right (150ms) */
+.slide-right-leave-active {
+  transition: transform 0.15s ease-in, opacity 0.15s ease-in;
 }
-.slide-right-leave-to   { transform: translateX(100%);  }
+.slide-right-leave-to { transform: translateX(18%); opacity: 0; }
+/* New page: slides in from left (250ms) */
+.slide-right-enter-active {
+  transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
 .slide-right-enter-from { transform: translateX(-100%); }
-.slide-right-leave-from,
-.slide-right-enter-to   { transform: translateX(0);     }
+.slide-right-enter-to   { transform: translateX(0); }
 </style>
