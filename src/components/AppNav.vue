@@ -90,12 +90,19 @@ function navigate(item) {
   align-items: center;
   justify-content: space-around;
 
-  background: #fff;
-  border: 1px solid rgba(240, 214, 228, 0.8);
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(28px) saturate(1.8);
+  -webkit-backdrop-filter: blur(28px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, 0.65);
   border-radius: 50px;
   padding: 8px 6px;
-  box-shadow: 0 4px 20px rgba(212, 39, 108, 0.12),
-              0 1px 4px rgba(212, 39, 108, 0.06);
+  box-shadow:
+    0 8px 32px rgba(212, 39, 108, 0.14),
+    0 2px 8px  rgba(212, 39, 108, 0.08),
+    inset 0  1px 0 rgba(255, 255, 255, 0.90),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.35),
+    inset  1px 0 0 rgba(255, 255, 255, 0.50),
+    inset -1px 0 0 rgba(255, 255, 255, 0.50);
 
   z-index: 99;
   pointer-events: none;
@@ -120,7 +127,12 @@ function navigate(item) {
 }
 
 .pill-tab.active {
-  background: var(--primary);
+  background: rgba(212, 39, 108, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 2px 12px rgba(212, 39, 108, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 /* ── Icon wrapper (positions badge) ───────────────────────────────────── */
