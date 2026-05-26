@@ -119,15 +119,35 @@ function navigate(item) {
   transition: background 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Glass effect on active tab only — frosted pink over page content */
+/* Option A — Simulated glass: diagonal gradient + gloss pseudo-element.
+   No backdrop-filter needed — works identically on every platform. */
 .pill-tab.active {
-  background: rgba(212, 39, 108, 0.88);
-  backdrop-filter: blur(16px) saturate(1.4);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    #e8387a 0%,
+    #D4276C 45%,
+    #b81f5a 100%
+  );
   box-shadow:
-    0 3px 14px rgba(212, 39, 108, 0.32),
-    inset 0 1px 0 rgba(255, 255, 255, 0.30),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.06);
+    0 3px 16px rgba(212, 39, 108, 0.40),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.50),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.08);
+}
+
+/* White gloss sweep — top half only, mimics light catching curved glass */
+.pill-tab.active::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.24) 0%,
+    rgba(255, 255, 255, 0.00) 55%
+  );
+  border-radius: inherit;
+  pointer-events: none;
 }
 
 /* ── Icon wrapper (positions badge) ───────────────────────────────────── */
