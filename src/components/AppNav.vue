@@ -90,12 +90,21 @@ function navigate(item) {
   align-items: center;
   justify-content: space-around;
 
-  background: #fff;
+  overflow: hidden;
+  background: linear-gradient(
+    180deg,
+    #ffffff     0%,
+    #fdf4f8    40%,
+    #f7e6f0   100%
+  );
   border: 1px solid rgba(240, 214, 228, 0.7);
   border-radius: 50px;
   padding: 8px 6px;
-  box-shadow: 0 4px 20px rgba(212, 39, 108, 0.10),
-              0 1px 4px  rgba(212, 39, 108, 0.06);
+  box-shadow:
+    0 4px 20px rgba(212, 39, 108, 0.12),
+    0 1px 4px  rgba(212, 39, 108, 0.06),
+    inset 0  2px 2px rgba(255, 255, 255, 1.00),
+    inset 0 -4px 10px rgba(180, 80, 130, 0.10);
 
   z-index: 99;
   pointer-events: none;
@@ -104,8 +113,29 @@ function navigate(item) {
   user-select: none;
 }
 
+/* Pearl gloss — oval specular highlight on top of the nav pill */
+.pill-nav::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 48%;
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.55) 45%,
+    rgba(255, 255, 255, 0.00) 100%
+  );
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
 /* ── Individual tab ────────────────────────────────────────────────────── */
 .pill-tab {
+  position: relative;
+  z-index: 1;
   flex: 1;
   display: flex;
   flex-direction: column;
