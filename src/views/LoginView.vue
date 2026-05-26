@@ -530,8 +530,6 @@ async function doLogin() {
 
   loading.value = true
   try {
-    await supabase.auth.signOut()
-
     // Resolve username → email if no @ detected
     let loginEmail = L.email.trim()
     if (!loginEmail.includes('@')) {
