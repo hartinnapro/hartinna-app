@@ -19,6 +19,9 @@ if (typeof window !== 'undefined') {
 export function useInstallPrompt() {
   const isInstalled =
     window.matchMedia('(display-mode: standalone)').matches ||
+    window.matchMedia('(display-mode: minimal-ui)').matches ||
+    window.matchMedia('(display-mode: window-controls-overlay)').matches ||
+    window.matchMedia('(display-mode: fullscreen)').matches ||
     navigator.standalone === true
 
   // iOS: Safari on iPhone/iPad — no beforeinstallprompt, needs manual instructions
