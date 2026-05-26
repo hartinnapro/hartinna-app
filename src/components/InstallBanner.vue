@@ -119,7 +119,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['close'])
 
-const { canInstall, isIos, isInstalled, wasDismissed, dismiss, triggerInstall } = useInstallPrompt()
+const { canInstall, isIos, isAndroid, isInstalled, wasDismissed, dismiss, triggerInstall } = useInstallPrompt()
 
 const visible         = ref(false)
 const installing      = ref(false)
@@ -163,12 +163,16 @@ function close() {
 }
 
 async function doInstall() {
-  installing.value = true
   const outcome = await triggerInstall()
-  if (outcome === 'dismissed') {
-    installing.value = false
+  if (outcome === 'dismissed') return
+
+  if (isAndroid) {
+    // Android: show progress UI, wait for appinstalled + user confirmation
+    installing.value = true
+  } else {
+    // Windows / desktop: Chrome opens the PWA natively — just close our sheet
+    close()
   }
-  // if 'accepted' → wait for appinstalled → readyToConfirm → user taps confirm → success
 }
 
 defineExpose({ open: () => { visible.value = true } })

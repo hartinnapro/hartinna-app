@@ -24,9 +24,8 @@ export function useInstallPrompt() {
     window.matchMedia('(display-mode: fullscreen)').matches ||
     navigator.standalone === true
 
-  // iOS: Safari on iPhone/iPad — no beforeinstallprompt, needs manual instructions
-  const isIos =
-    /iphone|ipad|ipod/i.test(navigator.userAgent) && !('MSStream' in window)
+  const isIos     = /iphone|ipad|ipod/i.test(navigator.userAgent) && !('MSStream' in window)
+  const isAndroid = /android/i.test(navigator.userAgent)
 
   const showIosPrompt = isIos && !isInstalled
 
@@ -47,6 +46,7 @@ export function useInstallPrompt() {
     canInstall: readonly(canInstall),
     isInstalled,
     isIos,
+    isAndroid,
     showIosPrompt,
     wasDismissed,
     dismiss,
