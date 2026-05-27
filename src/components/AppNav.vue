@@ -1,5 +1,8 @@
 <template>
-  <nav class="pill-nav" aria-label="Main navigation">
+  <nav class="pill-nav" :style="`--active-idx: ${activeIndex}`" aria-label="Main navigation">
+    <!-- Sliding indicator — moves behind the active tab -->
+    <div class="pill-indicator" aria-hidden="true"></div>
+
     <div
       v-for="item in items"
       :key="item.route"
@@ -64,6 +67,11 @@ function isActive(item) {
   return route.path === item.route || route.path.startsWith(item.route + '/')
 }
 
+const activeIndex = computed(() => {
+  const idx = items.findIndex(item => isActive(item))
+  return idx >= 0 ? idx : 0
+})
+
 function navigate(item) {
   if (isActive(item)) return
   const from = TAB_INDEX[route.path] ?? -1
@@ -115,7 +123,7 @@ function navigate(item) {
   user-select: none;
 }
 
-/* Pearl gloss — pink-tinted specular highlight, like light bouncing off a pearl */
+/* Pearl gloss on nav pill */
 .pill-nav::after {
   content: '';
   position: absolute;
@@ -135,27 +143,18 @@ function navigate(item) {
   z-index: 0;
 }
 
-/* ── Individual tab ────────────────────────────────────────────────────── */
-.pill-tab {
-  position: relative;
-  z-index: 1;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  padding: 7px 4px;
+/* ── Sliding indicator ─────────────────────────────────────────────────── */
+.pill-indicator {
+  position: absolute;
+  left: 6px;
+  top: 8px;
+  bottom: 8px;
+  width: calc((100% - 12px) / 4);
   border-radius: 40px;
-  cursor: pointer;
-  pointer-events: all;
-  -webkit-tap-highlight-color: transparent;
-  transition: background 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-}
+  pointer-events: none;
+  z-index: 1;
 
-/* 3D gel button — gloss baked into background, covers full pill width */
-.pill-tab.active {
-  position: relative;
-  overflow: hidden;
+  /* 3D gel — gloss baked into background */
   background:
     radial-gradient(ellipse 100% 55% at 50% 0%,
       rgba(255, 255, 255, 0.52)  0%,
@@ -172,11 +171,29 @@ function navigate(item) {
     0 6px 22px rgba(130, 15, 60, 0.55),
     0 2px 5px  rgba(130, 15, 60, 0.35),
     inset 0  2px 3px rgba(255, 255, 255, 0.55),
-    inset 0 -5px 10px rgba(0,   0,   0,   0.28);
+    inset 0 -5px 10px rgba(0, 0, 0, 0.28);
+
+  /* Spring slide — slight overshoot for a lively feel */
+  transform: translateX(calc(var(--active-idx, 0) * 100%));
+  transition: transform 0.40s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* ::before no longer needed — gloss is in background */
-.pill-tab.active::before { display: none; }
+/* ── Individual tab ────────────────────────────────────────────────────── */
+.pill-tab {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 7px 4px;
+  border-radius: 40px;
+  cursor: pointer;
+  pointer-events: all;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
 /* ── Icon wrapper (positions badge) ───────────────────────────────────── */
 .pill-icon-wrap {
