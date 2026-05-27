@@ -158,10 +158,10 @@ function navigate(item) {
   overflow: hidden;
   background: linear-gradient(
     180deg,
-    #f575a0 0%,
-    #e0347a 30%,
-    #c0265e 70%,
-    #9e1a4e 100%
+    #ee5590 0%,
+    #D4276C 38%,
+    #a81e56 72%,
+    #7a1240 100%
   );
   box-shadow:
     0 6px 22px rgba(130, 15, 60, 0.55),
