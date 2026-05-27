@@ -60,7 +60,7 @@
         <div class="product-grid" v-else>
           <div
             class="product-card"
-            :class="{ focused: focusedId === p.id }"
+            :class="{ focused: focusedId === p.id, revealed: revealedIds.has(p.id) }"
             :data-product-id="p.id"
             v-for="(p, idx) in products"
             :key="p.id"
@@ -202,22 +202,25 @@ function addToCart(p) {
 }
 
 // ── Scroll reveal ─────────────────────────────────────────────────────────────
-let revealObserver = null
+const revealedIds   = reactive(new Set())
+let   revealObserver = null
 
 async function setupScrollReveal() {
   await nextTick()
-  const cards = Array.from(document.querySelectorAll('.product-card'))
+  const cards = Array.from(document.querySelectorAll('.product-card[data-product-id]'))
   if (!cards.length) return
 
   const pageLoadTime = Date.now()
 
+  revealObserver?.disconnect()
   revealObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (!entry.isIntersecting) return
-      const idx          = cards.indexOf(entry.target)
+      const id           = entry.target.dataset.productId
       const isInitialLoad = Date.now() - pageLoadTime < 800
+      const idx           = cards.indexOf(entry.target)
       const delay         = isInitialLoad ? idx * 70 : 0
-      setTimeout(() => entry.target.classList.add('revealed'), delay)
+      setTimeout(() => revealedIds.add(id), delay)
       revealObserver.unobserve(entry.target)
     })
   }, { threshold: 0.08 })
@@ -226,6 +229,8 @@ async function setupScrollReveal() {
 }
 
 watch(state, val => { if (val === 'ready') setupScrollReveal() })
+// Re-run when products list refreshes from API (after cache hit)
+watch(() => products.value.length, () => { if (state.value === 'ready') setupScrollReveal() })
 onMounted(async () => {
   const session = await guardedSession()
   if (!session) { router.push('/login'); return }
