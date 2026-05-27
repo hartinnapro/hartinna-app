@@ -86,7 +86,7 @@
 
             <div class="product-footer" @click.stop>
               <div class="qty-stepper">
-                <button class="qty-btn" @click="decQty(p)" :disabled="localQty(p.id) <= 0">−</button>
+                <button class="qty-btn" @click="decQty(p)" :disabled="localQty(p.id) <= 1">−</button>
                 <input
                   class="qty-val"
                   type="text"
@@ -188,7 +188,7 @@ const cartCount  = computed(() => cart.cartCount)
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function price(p)  { return p.product_prices?.[0]?.price  ?? 0 }
 function minQty(p) { return p.product_prices?.[0]?.min_qty ?? 1 }
-function localQty(id) { return localQtys[id] ?? 0 }
+function localQty(id) { return localQtys[id] ?? 1 }
 
 function showToast(msg) {
   clearTimeout(toastTimer)
@@ -202,18 +202,14 @@ function incQty(p) {
 }
 
 function decQty(p) {
-  if ((localQtys[p.id] ?? 0) <= 0) return
+  if ((localQtys[p.id] ?? 1) <= 1) return
   localQtys[p.id]--
-  if (localQtys[p.id] === 0 && cart.inCart(p.id)) {
-    cart.remove(p.id)
-  }
 }
 
 function setQty(p, val) {
   const n = parseInt(val)
-  if (isNaN(n) || n < 0) { localQtys[p.id] = localQtys[p.id] ?? 0; return }
+  if (isNaN(n) || n < 1) { localQtys[p.id] = 1; return }
   localQtys[p.id] = n
-  if (n === 0 && cart.inCart(p.id)) cart.remove(p.id)
 }
 
 // ── Add to cart with hearts animation ─────────────────────────────────────────
@@ -572,14 +568,33 @@ onUnmounted(() => {
 .btn-add {
   padding: 7px 10px;
   background: var(--primary); color: white;
-  border: none; border-radius: var(--radius-xs);
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-xs);
   cursor: pointer;
   display: flex; align-items: center; gap: 4px;
-  transition: background 0.20s, opacity 0.15s;
+  transition: background 0.22s, color 0.22s, border-color 0.22s, box-shadow 0.22s;
   flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
 }
-.btn-add:hover { opacity: 0.88; }
-.btn-add.feedback { background: #e8387a; }
+.btn-add:active { transform: scale(0.88); }
+
+/* Option D: invert colours + scale-up wiggle */
+.btn-add.feedback {
+  background: white;
+  color: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(212, 39, 108, 0.20);
+  animation: btn-wiggle 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes btn-wiggle {
+  0%   { transform: scale(1.20) rotate(0deg);   }
+  20%  { transform: scale(1.12) rotate(-10deg);  }
+  40%  { transform: scale(1.06) rotate( 10deg);  }
+  60%  { transform: scale(1.03) rotate(-6deg);   }
+  80%  { transform: scale(1.01) rotate( 4deg);   }
+  100% { transform: scale(1)    rotate(0deg);    }
+}
 
 .tick-icon {
   animation: tick-pop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
