@@ -110,6 +110,7 @@
                 <svg v-if="feedbackIds.has(p.id)" class="tick-icon" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                   <polyline points="20 6 9 17 4 12"/>
                 </svg>
+                <span v-if="cart.getQty(p.id) > 0" class="btn-cart-badge">{{ cart.getQty(p.id) }}</span>
               </button>
             </div>
           </div>
@@ -234,6 +235,7 @@ function handleAddToCart(p, event) {
   }
 
   cart.addToCart(p, cart.getQty(p.id) + actualQty)
+  localQtys[p.id] = 1  // reset stepper after each add
 
   // Reset 1.5s feedback timer on every tap
   clearTimeout(feedbackTimers.get(p.id))
@@ -564,8 +566,34 @@ onUnmounted(() => {
   line-height: 28px;
 }
 
-/* Add button */
+/* Cart qty badge on add button */
 .btn-add {
+  position: relative;
+}
+.btn-cart-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: white;
+  color: var(--primary);
+  border: 1.5px solid var(--primary);
+  font-size: 9px;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  pointer-events: none;
+}
+.btn-add.feedback .btn-cart-badge {
+  background: var(--primary);
+  color: white;
+  border-color: white;
+}
   padding: 7px 10px;
   background: var(--primary); color: white;
   border: 1.5px solid transparent;
