@@ -165,8 +165,8 @@ function navigate(item) {
     linear-gradient(180deg,
       #ee5590  0%,
       #D4276C 38%,
-      #a81e56 72%,
-      #7a1240 100%
+      #bc2862 72%,
+      #961a4e 100%
     );
   box-shadow:
     0 6px 22px rgba(130, 15, 60, 0.55),
@@ -190,17 +190,15 @@ function navigate(item) {
 .pill-tab svg {
   color: var(--primary);
   transition: color 0.22s cubic-bezier(0.4, 0, 0.2, 1), filter 0.22s;
-  /* Tight metallic line — highlight sits ON the top edge, shadow on bottom edge */
   filter:
-    drop-shadow(0 -0.5px 0   rgba(255, 230, 240, 1.00))
-    drop-shadow(0  0.5px 0   rgba(140,  15,  65, 0.60));
+    drop-shadow(0 -1px 0   rgba(255, 240, 248, 1.00))
+    drop-shadow(0  1px 0   rgba(150,  10,  60, 0.55));
 }
 .pill-tab.active svg {
   color: #fff;
-  /* Metallic white line */
   filter:
-    drop-shadow(0 -0.5px 0   rgba(255, 255, 255, 1.00))
-    drop-shadow(0  0.5px 0.5px rgba(70,   0,  25, 0.65));
+    drop-shadow(0 -1px 0     rgba(255, 255, 255, 1.00))
+    drop-shadow(0  1px 0.5px rgba(80,   0,  30, 0.60));
 }
 
 /* ── Label ─────────────────────────────────────────────────────────────── */
@@ -212,18 +210,16 @@ function navigate(item) {
   line-height: 1;
   pointer-events: none;
   transition: color 0.22s cubic-bezier(0.4, 0, 0.2, 1), text-shadow 0.22s;
-  /* Tight metallic pink line */
   text-shadow:
-    0 -0.5px 0 rgba(255, 230, 240, 1.00),
-    0  0.5px 0 rgba(140,  15,  65, 0.60);
+    0 -1px 0 rgba(255, 240, 248, 1.00),
+    0  1px 0 rgba(150,  10,  60, 0.55);
 }
 .pill-tab.active .pill-label {
   font-weight: 500;
   color: #fff;
-  /* Tight metallic white */
   text-shadow:
-    0 -0.5px 0   rgba(255, 255, 255, 1.00),
-    0  0.5px 0.5px rgba(70,   0,  25, 0.65);
+    0 -1px 0     rgba(255, 255, 255, 1.00),
+    0  1px 0.5px rgba(80,   0,  30, 0.60);
 }
 
 /* ── Cart badge ────────────────────────────────────────────────────────── */
