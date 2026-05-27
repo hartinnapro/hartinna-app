@@ -165,8 +165,8 @@ function navigate(item) {
     linear-gradient(180deg,
       #ee5590  0%,
       #D4276C 38%,
-      #bc2862 72%,
-      #961a4e 100%
+      #c83070 72%,
+      #b52868 100%
     );
   box-shadow:
     0 6px 22px rgba(130, 15, 60, 0.55),
