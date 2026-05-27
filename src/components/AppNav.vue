@@ -185,7 +185,7 @@ function navigate(item) {
 
   /* Matches page enter transition exactly — pill and content arrive together */
   transform: translateX(calc(var(--active-idx, 0) * 100%));
-  transition: transform var(--page-enter-dur) var(--page-enter-ease);
+  transition: transform calc(var(--page-enter-dur) + 0.3s) var(--page-enter-ease);
 }
 
 /* ── Individual tab ────────────────────────────────────────────────────── */
