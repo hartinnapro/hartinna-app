@@ -350,11 +350,6 @@ onMounted(async () => {
 
   cart.load()
 
-  // Restore local qtys from cart
-  Object.entries(cart.items).forEach(([id, item]) => {
-    localQtys[id] = item.qty
-  })
-
   const uid  = session.user.id
   const CKEY = `hpp_home_${uid}`
   const cached = hppGetCache(CKEY)
