@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, h } from 'vue'
+import { ref, computed, watch, onMounted, h } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { slideDirection } from '@/composables/useSwipeNav'
