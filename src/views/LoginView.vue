@@ -112,6 +112,9 @@
 
         <!-- REGISTER -->
         <div v-else-if="view === 'register'" key="register">
+          <button class="back-btn" @click="view = 'login'" aria-label="Back to sign in">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+          </button>
           <div class="card-title">Become a Partner</div>
           <div class="card-subtitle">Create your Hartinna Partner account</div>
 
@@ -193,6 +196,9 @@
 
         <!-- FORGOT EMAIL -->
         <div v-else-if="view === 'forgot_email'" key="forgot_email">
+          <button class="back-btn" @click="view = 'login'" aria-label="Back to sign in">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+          </button>
           <div class="card-title" style="margin-bottom:5px;">Forgot your email? 💭</div>
           <div class="card-subtitle">Enter your registered phone number and we'll show your email.</div>
 
@@ -830,6 +836,21 @@ html.aurora-bg body { background-color: transparent; background-image: none; ani
   padding: 30px 24px 24px;
 }
 .card-title    { font-family: 'Playfair Display', Georgia, serif; font-size: 21px; color: var(--text); margin-bottom: 5px; }
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(212, 39, 108, 0.08);
+  color: var(--primary);
+  cursor: pointer;
+  margin-bottom: 14px;
+  transition: background 0.15s;
+}
+.back-btn:hover { background: rgba(212, 39, 108, 0.14); }
 .card-subtitle { font-size: 13.5px; color: var(--text-muted); margin-bottom: 22px; line-height: 1.5; }
 
 /* ── Alert ───────────────────────────────────────────────────────────────── */

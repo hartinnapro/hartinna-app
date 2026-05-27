@@ -199,7 +199,7 @@ function showToast(msg) {
 
 // ── Qty controls ──────────────────────────────────────────────────────────────
 function incQty(p) {
-  localQtys[p.id] = (localQtys[p.id] ?? 0) + 1
+  localQtys[p.id] = (localQtys[p.id] ?? 1) + 1
 }
 
 function decQty(p) {
