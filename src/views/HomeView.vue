@@ -64,7 +64,6 @@
             :data-product-id="p.id"
             v-for="(p, idx) in products"
             :key="p.id"
-            :style="{ animationDelay: (idx * 0.06) + 's' }"
             @click="toggleFocus(p)"
           >
             <div class="product-img">
@@ -111,7 +110,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import { guardedSession } from '@/lib/session'
@@ -202,7 +201,31 @@ function addToCart(p) {
   }
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
+// ── Scroll reveal ─────────────────────────────────────────────────────────────
+let revealObserver = null
+
+async function setupScrollReveal() {
+  await nextTick()
+  const cards = Array.from(document.querySelectorAll('.product-card'))
+  if (!cards.length) return
+
+  const pageLoadTime = Date.now()
+
+  revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return
+      const idx          = cards.indexOf(entry.target)
+      const isInitialLoad = Date.now() - pageLoadTime < 800
+      const delay         = isInitialLoad ? idx * 70 : 0
+      setTimeout(() => entry.target.classList.add('revealed'), delay)
+      revealObserver.unobserve(entry.target)
+    })
+  }, { threshold: 0.08 })
+
+  cards.forEach(c => revealObserver.observe(c))
+}
+
+watch(state, val => { if (val === 'ready') setupScrollReveal() })
 onMounted(async () => {
   const session = await guardedSession()
   if (!session) { router.push('/login'); return }
@@ -245,6 +268,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.removeEventListener('click', handleOutsideClick)
+  revealObserver?.disconnect()
 })
 </script>
 
@@ -310,21 +334,35 @@ onUnmounted(() => {
 .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
 .product-card {
-  animation: reveal 0.30s ease backwards;
+  /* Scroll reveal — starts hidden, shifted down, slightly zoomed */
+  opacity: 0;
+  transform: translateY(32px) scale(1.06);
+  transition:
+    opacity   0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    transform 0.75s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    box-shadow 0.28s ease,
+    filter     0.22s ease;
+
   background: var(--card);
   border-radius: var(--radius);
   border: 1px solid rgba(232,216,212,0.6);
   overflow: hidden;
   box-shadow: 0 2px 10px rgba(44,24,16,0.06);
   display: flex; flex-direction: column;
-  transition:
-    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.28s ease,
-    opacity 0.22s ease,
-    filter 0.22s ease;
   cursor: pointer;
   position: relative;
   z-index: 1;
+}
+
+/* Once revealed — switch to fast transitions for tap interactions */
+.product-card.revealed {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition:
+    opacity    0.15s ease,
+    transform  0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.28s ease,
+    filter     0.22s ease;
 }
 
 /* Focused — lifted hero state */
@@ -347,7 +385,15 @@ onUnmounted(() => {
   background: linear-gradient(135deg, #FDF0F2, #FBF3EE);
   overflow: hidden;
 }
-.product-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.product-img img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  transform: scale(1.14);
+  transition: transform 0.85s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+/* Image settles to natural size once card is revealed */
+.product-card.revealed .product-img img {
+  transform: scale(1);
+}
 .product-img-placeholder {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
