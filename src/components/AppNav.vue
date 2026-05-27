@@ -217,9 +217,7 @@ function navigate(item) {
 .pill-tab.active .pill-label {
   font-weight: 400;
   color: #fff;
-  text-shadow:
-    0 -1px 0     rgba(255, 255, 255, 1.00),
-    0  1px 0.5px rgba(80,   0,  30, 0.60);
+  text-shadow: none;
 }
 
 /* ── Cart badge ────────────────────────────────────────────────────────── */
