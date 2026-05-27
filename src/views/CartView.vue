@@ -27,7 +27,7 @@
           </div>
         </div>
 
-        <div class="cart-item" v-for="item in cartList" :key="item.product.id">
+        <div class="cart-item" :class="{ removing: removingIds.has(item.product.id) }" v-for="item in cartList" :key="item.product.id">
           <!-- item-img-wrap holds the 56×56 space in the flex layout.
                The inner item-img expands with actual width/height so iOS
                renders at native resolution — no GPU-stretch blurriness. -->
@@ -179,6 +179,7 @@ const alertMsg = ref('')
 // Remove confirmation state
 const showRemoveModal   = ref(false)
 const pendingRemoveItem = ref(null)
+const removingIds       = reactive(new Set())
 
 // Photo-expand state (tap a product photo to overlay-zoom it)
 const expandedPhotoId = ref(null)
@@ -229,11 +230,19 @@ function cancelRemove() {
 }
 
 function confirmRemove() {
-  if (pendingRemoveItem.value) {
-    cart.remove(pendingRemoveItem.value.product.id)
-  }
-  showRemoveModal.value = false
+  const item = pendingRemoveItem.value
+  showRemoveModal.value   = false
   pendingRemoveItem.value = null
+  if (!item) return
+
+  const id = item.product.id
+  removingIds.add(id)
+
+  // Let the exit animation finish (450ms), then remove from cart
+  setTimeout(() => {
+    cart.remove(id)
+    removingIds.delete(id)
+  }, 440)
 }
 
 function validate() {
@@ -417,6 +426,14 @@ onUnmounted(() => {
   border: 1px solid rgba(232,216,212,0.6);
   padding: 14px; display: flex; gap: 12px;
   margin-bottom: 10px; box-shadow: 0 2px 8px rgba(44,24,16,0.05);
+  transition: opacity 0.44s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.44s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+/* Exit animation — reverse of the product reveal */
+.cart-item.removing {
+  opacity: 0;
+  transform: scale(1.06) translateY(28px);
+  pointer-events: none;
 }
 .item-img-wrap {
   width: 56px; height: 56px;
