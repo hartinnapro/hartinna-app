@@ -215,7 +215,7 @@ function navigate(item) {
     0  1px 0 rgba(150,  10,  60, 0.55);
 }
 .pill-tab.active .pill-label {
-  font-weight: 500;
+  font-weight: 400;
   color: #fff;
   text-shadow:
     0 -1px 0     rgba(255, 255, 255, 1.00),
