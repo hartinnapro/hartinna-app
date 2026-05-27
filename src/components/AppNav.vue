@@ -199,10 +199,18 @@ function navigate(item) {
 
 .pill-tab svg {
   color: var(--primary);
-  transition: color 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: color 0.22s cubic-bezier(0.4, 0, 0.2, 1), filter 0.22s;
+  /* Inactive metallic pink — light highlight above, deeper shadow below */
+  filter:
+    drop-shadow(0 -1px 0   rgba(255, 210, 228, 0.90))
+    drop-shadow(0  1px 1px rgba(120,  10,  55, 0.45));
 }
 .pill-tab.active svg {
   color: #fff;
+  /* Active metallic white — bright rim above, deep warm shadow below */
+  filter:
+    drop-shadow(0 -1px 0   rgba(255, 255, 255, 1.00))
+    drop-shadow(0  1px 2px rgba(70,   0,  25, 0.55));
 }
 
 /* ── Label ─────────────────────────────────────────────────────────────── */
@@ -213,10 +221,18 @@ function navigate(item) {
   letter-spacing: 0.01em;
   line-height: 1;
   pointer-events: none;
-  transition: color 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: color 0.22s cubic-bezier(0.4, 0, 0.2, 1), text-shadow 0.22s;
+  /* Inactive metallic pink */
+  text-shadow:
+    0 -1px 0   rgba(255, 210, 228, 0.90),
+    0  1px 1px rgba(120,  10,  55, 0.45);
 }
 .pill-tab.active .pill-label {
   color: #fff;
+  /* Active metallic white */
+  text-shadow:
+    0 -1px 0   rgba(255, 255, 255, 1.00),
+    0  1px 2px rgba(70,   0,  25, 0.55);
 }
 
 /* ── Cart badge ────────────────────────────────────────────────────────── */
