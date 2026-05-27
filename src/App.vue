@@ -140,6 +140,12 @@ function onAfterEnter() { unlock() }
 /* Login page: match the aurora base colour so sides don't show a contrasting bar on wide screens */
 .swipe-root.login-bg { background: #FEF2F8; }
 
+/* ── Shared transition tokens (pill nav reads these too) ────────────────── */
+:root {
+  --page-enter-dur:  0.25s;
+  --page-enter-ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
 /* ── Default transition: fade ───────────────────────────────────────────── */
 .page-leave-active { transition: opacity 0.14s ease-in; }
 .page-enter-active { transition: opacity 0.18s ease-out; }
@@ -152,7 +158,7 @@ function onAfterEnter() { unlock() }
 }
 .slide-left-leave-to   { transform: translateX(-20%); opacity: 0; }
 .slide-left-enter-active {
-  transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: transform var(--page-enter-dur) var(--page-enter-ease);
 }
 .slide-left-enter-from { transform: translateX(100%); }
 .slide-left-enter-to   { transform: translateX(0); }
@@ -163,7 +169,7 @@ function onAfterEnter() { unlock() }
 }
 .slide-right-leave-to   { transform: translateX(20%); opacity: 0; }
 .slide-right-enter-active {
-  transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: transform var(--page-enter-dur) var(--page-enter-ease);
 }
 .slide-right-enter-from { transform: translateX(-100%); }
 .slide-right-enter-to   { transform: translateX(0); }

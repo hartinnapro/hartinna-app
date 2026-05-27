@@ -173,9 +173,9 @@ function navigate(item) {
     inset 0  2px 3px rgba(255, 255, 255, 0.55),
     inset 0 -5px 10px rgba(0, 0, 0, 0.28);
 
-  /* Spring slide — slight overshoot for a lively feel */
+  /* Matches page enter transition exactly — pill and content arrive together */
   transform: translateX(calc(var(--active-idx, 0) * 100%));
-  transition: transform 0.40s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform var(--page-enter-dur) var(--page-enter-ease);
 }
 
 /* ── Individual tab ────────────────────────────────────────────────────── */
