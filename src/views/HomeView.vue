@@ -78,7 +78,6 @@
               <div class="product-name">{{ p.name }}</div>
               <div class="product-price">
                 MYR {{ price(p).toFixed(2) }}
-                <span>/ unit</span>
               </div>
               <div class="product-minqty" v-if="minQty(p) > 1">
                 Min. {{ minQty(p) }} units
@@ -88,14 +87,29 @@
             <div class="product-footer" @click.stop>
               <div class="qty-stepper">
                 <button class="qty-btn" @click="decQty(p)" :disabled="localQty(p.id) <= 0">−</button>
-                <div class="qty-val">{{ localQty(p.id) }}</div>
+                <input
+                  class="qty-val"
+                  type="text"
+                  inputmode="numeric"
+                  :value="localQty(p.id)"
+                  @change="setQty(p, $event.target.value)"
+                  @focus="$event.target.select()"
+                  @click.stop
+                />
                 <button class="qty-btn" @click="incQty(p)">+</button>
               </div>
               <button
-                :class="['btn-add', cart.inCart(p.id) ? 'in-cart' : '']"
-                @click="addToCart(p)"
+                class="btn-add"
+                :class="{ feedback: feedbackIds.has(p.id) }"
+                @click.stop="handleAddToCart(p, $event)"
               >
-                {{ cart.inCart(p.id) ? '✓ Added' : 'Add' }}
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                </svg>
+                <svg v-if="feedbackIds.has(p.id)" class="tick-icon" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
               </button>
             </div>
           </div>
@@ -105,6 +119,15 @@
 
     <!-- Toast -->
     <div :class="['toast', toast.visible ? '' : 'hide']" aria-live="polite">{{ toast.msg }}</div>
+
+    <!-- Flying hearts -->
+    <Teleport to="body">
+      <div v-for="h in flyingHearts" :key="h.id" class="flying-heart" :style="h.style">
+        <svg :width="h.size" :height="h.size" viewBox="0 0 24 24" :fill="h.color">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+      </div>
+    </Teleport>
 
   </div>
 </template>
@@ -186,18 +209,110 @@ function decQty(p) {
   }
 }
 
-function addToCart(p) {
+function setQty(p, val) {
+  const n = parseInt(val)
+  if (isNaN(n) || n < 0) { localQtys[p.id] = localQtys[p.id] ?? 0; return }
+  localQtys[p.id] = n
+  if (n === 0 && cart.inCart(p.id)) cart.remove(p.id)
+}
+
+// ── Add to cart with hearts animation ─────────────────────────────────────────
+const feedbackIds    = reactive(new Set())
+const feedbackTimers = new Map()
+const activeAnims    = reactive(new Set())
+const flyingHearts   = reactive([])
+
+function handleAddToCart(p, event) {
   const qty = localQtys[p.id] ?? 0
   const min = minQty(p)
+
+  let actualQty
   if (qty === 0) {
+    actualQty = min
     localQtys[p.id] = min
-    cart.addToCart(p, min)
-    showToast(`Added ${p.name} ×${min}`)
   } else if (qty < min) {
     showToast(`Minimum order is ${min} units`)
+    return
   } else {
-    cart.addToCart(p, qty)
-    showToast(`Added ${p.name} ×${qty}`)
+    actualQty = qty
+  }
+
+  cart.addToCart(p, actualQty)
+
+  // Reset 3s feedback timer on every tap
+  clearTimeout(feedbackTimers.get(p.id))
+  feedbackIds.add(p.id)
+  feedbackTimers.set(p.id, setTimeout(() => {
+    feedbackIds.delete(p.id)
+    feedbackTimers.delete(p.id)
+    activeAnims.delete(p.id)
+  }, 3000))
+
+  // Hearts: throttle to one animation at a time
+  if (!activeAnims.has(p.id)) {
+    activeAnims.add(p.id)
+    launchHearts(event.currentTarget)
+  }
+}
+
+function launchHearts(buttonEl) {
+  if (!buttonEl) return
+  const cartEl = document.querySelector('.header-cart')
+  if (!cartEl) return
+
+  const sr = buttonEl.getBoundingClientRect()
+  const tr = cartEl.getBoundingClientRect()
+  const sx = sr.left + sr.width  / 2
+  const sy = sr.top  + sr.height / 2
+  const tx = tr.left + tr.width  / 2
+  const ty = tr.top  + tr.height / 2
+
+  const colors   = ['#ffc0d8', '#ff85b3', '#ff5590', '#D4276C', '#f47eb0']
+  const sizes    = [10, 16, 12, 18, 14]
+  const count    = 5
+
+  for (let i = 0; i < count; i++) {
+    const id       = `h${Date.now()}${i}`
+    const scatterX = (Math.random() - 0.5) * 90
+    const scatterY = -(40 + Math.random() * 50)
+    const rot1     = (Math.random() - 0.5) * 40
+    const rot2     = (Math.random() - 0.5) * 60
+    const duration = 720
+    const delay    = i * 70
+
+    // Inject unique keyframe
+    const kfName = `hfly${id}`
+    const styleTag = document.createElement('style')
+    styleTag.id = `kf-${id}`
+    styleTag.textContent = `
+      @keyframes ${kfName} {
+        0%   { transform: translate(${sx}px,${sy}px) scale(1) rotate(0deg); opacity:1; }
+        30%  { transform: translate(${sx+scatterX}px,${sy+scatterY}px) scale(1.4) rotate(${rot1}deg); opacity:1; }
+        100% { transform: translate(${tx}px,${ty}px) scale(0.1) rotate(${rot2}deg); opacity:0; }
+      }
+    `
+    document.head.appendChild(styleTag)
+
+    flyingHearts.push({
+      id,
+      size:  sizes[i],
+      color: colors[i],
+      style: {
+        position:      'fixed',
+        left:          '0',
+        top:           '0',
+        pointerEvents: 'none',
+        zIndex:        '9999',
+        animation:     `${kfName} ${duration}ms ${delay}ms cubic-bezier(0.25,0.46,0.45,0.94) forwards`,
+      }
+    })
+
+    // Cleanup after animation completes
+    setTimeout(() => {
+      const idx = flyingHearts.findIndex(h => h.id === id)
+      if (idx !== -1) flyingHearts.splice(idx, 1)
+      document.getElementById(`kf-${id}`)?.remove()
+    }, duration + delay + 100)
   }
 }
 
@@ -441,23 +556,41 @@ onUnmounted(() => {
 .qty-btn:hover { background: var(--primary-light); }
 .qty-btn:disabled { color: var(--border); cursor: not-allowed; }
 .qty-val {
-  width: 30px; text-align: center;
+  width: 42px; height: 28px;
+  text-align: center;
   font-size: 13px; font-weight: 600; color: var(--text);
+  font-family: var(--font-body);
+  border: none;
   border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+  background: none; outline: none;
+  padding: 0;
+  -webkit-appearance: none;
   line-height: 28px;
 }
 
 /* Add button */
 .btn-add {
-  padding: 7px 12px;
+  padding: 7px 10px;
   background: var(--primary); color: white;
   border: none; border-radius: var(--radius-xs);
-  font-family: var(--font-body); font-size: 12px; font-weight: 600;
-  cursor: pointer; transition: background 0.15s, opacity 0.15s;
-  white-space: nowrap;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 4px;
+  transition: background 0.20s, opacity 0.15s;
+  flex-shrink: 0;
 }
 .btn-add:hover { opacity: 0.88; }
-.btn-add.in-cart { background: var(--success); }
+.btn-add.feedback { background: #e8387a; }
+
+.tick-icon {
+  animation: tick-pop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes tick-pop {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* Flying hearts are positioned via inline styles */
+.flying-heart { pointer-events: none; }
 
 /* Toast */
 .toast {
