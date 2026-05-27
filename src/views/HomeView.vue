@@ -569,31 +569,6 @@ onUnmounted(() => {
 /* Cart qty badge on add button */
 .btn-add {
   position: relative;
-}
-.btn-cart-badge {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  background: white;
-  color: var(--primary);
-  border: 1.5px solid var(--primary);
-  font-size: 9px;
-  font-weight: 700;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 3px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  pointer-events: none;
-}
-.btn-add.feedback .btn-cart-badge {
-  background: var(--primary);
-  color: white;
-  border-color: white;
-}
   padding: 7px 10px;
   background: var(--primary); color: white;
   border: 1.5px solid transparent;
@@ -605,6 +580,24 @@ onUnmounted(() => {
   -webkit-tap-highlight-color: transparent;
 }
 .btn-add:active { transform: scale(0.88); }
+
+.btn-cart-badge {
+  position: absolute;
+  top: -6px; right: -6px;
+  background: white;
+  color: var(--primary);
+  border: 1.5px solid var(--primary);
+  font-size: 9px; font-weight: 700;
+  min-width: 16px; height: 16px;
+  padding: 0 3px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1; pointer-events: none;
+}
+.btn-add.feedback .btn-cart-badge {
+  background: var(--primary);
+  color: white;
+  border-color: white;
+}
 
 /* Option D: invert colours + scale-up wiggle */
 .btn-add.feedback {
