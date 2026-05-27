@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import { computed, h } from 'vue'
+import { ref, watch, onMounted, h } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { slideDirection } from '@/composables/useSwipeNav'
@@ -67,9 +67,19 @@ function isActive(item) {
   return route.path === item.route || route.path.startsWith(item.route + '/')
 }
 
-const activeIndex = computed(() => {
-  const idx = items.findIndex(item => isActive(item))
-  return idx >= 0 ? idx : 0
+// activeIndex is a ref, not a computed — we delay its update by one
+// requestAnimationFrame so it starts exactly when Vue's <Transition>
+// starts the enter animation, keeping pill slide and page in sync.
+const activeIndex = ref(items.findIndex(item => isActive(item)))
+
+onMounted(() => {
+  activeIndex.value = items.findIndex(item => isActive(item))
+})
+
+watch(() => route.path, () => {
+  requestAnimationFrame(() => {
+    activeIndex.value = items.findIndex(item => isActive(item))
+  })
 })
 
 function navigate(item) {
