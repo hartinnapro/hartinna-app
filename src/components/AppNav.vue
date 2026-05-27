@@ -152,17 +152,22 @@ function navigate(item) {
   transition: background 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 3D gel button — light source from above */
+/* 3D gel button — gloss baked into background, covers full pill width */
 .pill-tab.active {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(
-    180deg,
-    #ee5590 0%,
-    #D4276C 38%,
-    #a81e56 72%,
-    #7a1240 100%
-  );
+  background:
+    radial-gradient(ellipse 100% 55% at 50% 0%,
+      rgba(255, 255, 255, 0.52)  0%,
+      rgba(255, 255, 255, 0.18) 45%,
+      rgba(255, 255, 255, 0.00) 100%
+    ),
+    linear-gradient(180deg,
+      #ee5590  0%,
+      #D4276C 38%,
+      #a81e56 72%,
+      #7a1240 100%
+    );
   box-shadow:
     0 6px 22px rgba(130, 15, 60, 0.55),
     0 2px 5px  rgba(130, 15, 60, 0.35),
@@ -170,23 +175,8 @@ function navigate(item) {
     inset 0 -5px 10px rgba(0,   0,   0,   0.28);
 }
 
-/* Oval specular highlight — the convex surface catching the light */
-.pill-tab.active::before {
-  content: '';
-  position: absolute;
-  top: 2px;
-  left: 10%;
-  right: 10%;
-  height: 44%;
-  background: radial-gradient(
-    ellipse at 50% 10%,
-    rgba(255, 255, 255, 0.92) 0%,
-    rgba(255, 255, 255, 0.55) 40%,
-    rgba(255, 255, 255, 0.00) 80%
-  );
-  border-radius: 50%;
-  pointer-events: none;
-}
+/* ::before no longer needed — gloss is in background */
+.pill-tab.active::before { display: none; }
 
 /* ── Icon wrapper (positions badge) ───────────────────────────────────── */
 .pill-icon-wrap {
