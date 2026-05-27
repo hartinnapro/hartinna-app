@@ -233,16 +233,16 @@ function handleAddToCart(p, event) {
     actualQty = qty
   }
 
-  cart.addToCart(p, actualQty)
+  cart.addToCart(p, cart.getQty(p.id) + actualQty)
 
-  // Reset 3s feedback timer on every tap
+  // Reset 1.5s feedback timer on every tap
   clearTimeout(feedbackTimers.get(p.id))
   feedbackIds.add(p.id)
   feedbackTimers.set(p.id, setTimeout(() => {
     feedbackIds.delete(p.id)
     feedbackTimers.delete(p.id)
     activeAnims.delete(p.id)
-  }, 3000))
+  }, 1500))
 
   // Hearts: throttle to one animation at a time
   if (!activeAnims.has(p.id)) {
