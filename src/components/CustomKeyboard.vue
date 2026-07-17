@@ -213,11 +213,11 @@ onBeforeUnmount(() => bsUp())
         </div>
         <!-- asdf row: 9 keys, inset exactly half a key each side (native iOS) -->
         <div class="osk-row">
-          <span class="osk-sp1"></span>
+          <span class="osk-sp-half"></span>
           <button v-for="k in ROWS[2]" :key="k" class="osk-key"
                   @pointerdown="onKeyDown($event, 'letter', k)"
                   @pointerup="hideKeycap" @pointerleave="hideKeycap">{{ upperNext ? k.toUpperCase() : k }}</button>
-          <span class="osk-sp1"></span>
+          <span class="osk-sp-half"></span>
         </div>
         <!-- shift + zxcv + backspace -->
         <div class="osk-row osk-row-z">
@@ -228,9 +228,11 @@ onBeforeUnmount(() => bsUp())
               <path d="M12 4l8 8h-5v8h-6v-8H4z" :fill="(forceUpper || shift) ? 'currentColor' : 'none'"/>
             </svg>
           </button>
+          <span class="osk-sp-gap"></span>
           <button v-for="k in ROWS[3]" :key="k" class="osk-key"
                   @pointerdown="onKeyDown($event, 'letter', k)"
                   @pointerup="hideKeycap" @pointerleave="hideKeycap">{{ upperNext ? k.toUpperCase() : k }}</button>
+          <span class="osk-sp-gap"></span>
           <button class="osk-key osk-backspace"
                   @pointerdown="bsDown" @pointerup="bsUp" @pointerleave="bsUp" aria-label="Backspace">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">
@@ -281,47 +283,47 @@ onBeforeUnmount(() => bsUp())
   box-sizing: border-box;
   -webkit-user-select: none; user-select: none;
 }
-.osk-row { display: grid; grid-template-columns: repeat(20, 1fr); gap: 5px; }
-.osk-sp1 { grid-column: span 1; }
+/* 40-col grid: letter/digit = 4 cols; half-key inset = 2; shift/backspace = 5 (~1.25×) */
+.osk-row { display: grid; grid-template-columns: repeat(40, 1fr); gap: 6px; }
+.osk-sp-half { grid-column: span 2; }
+.osk-sp-gap  { grid-column: span 1; }
 .osk-key {
-  grid-column: span 2;
-  height: 44px;
+  grid-column: span 4;
+  height: 42px;
   background: #fff;
-  border: 1px solid rgba(212, 39, 108, 0.10);
-  border-radius: 7px;
+  border: 1px solid rgba(212, 39, 108, 0.08);
+  border-radius: 5px;
   color: #3a2731;
-  font-size: 22px; font-weight: 500;
+  font-size: 21px; font-weight: 450;
   font-family: inherit;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 1.5px 0 rgba(184, 31, 90, 0.14);
+  box-shadow: 0 1px 0 rgba(120, 40, 70, 0.20);
   cursor: pointer; padding: 0; min-width: 0;
   touch-action: manipulation;
-  transition: background .08s, transform .08s;
+  transition: background .08s, transform .06s;
 }
-.osk-digit { font-size: 20px; font-weight: 450; color: #6a4a58; }
+.osk-digit { font-size: 19px; font-weight: 400; color: #6a4a58; }
 .osk-key:active { background: var(--primary-light, #FCE4EF); transform: scale(0.94); }
 
-.osk-row-z { grid-template-columns: repeat(20, 1fr); }
-.osk-shift, .osk-backspace { grid-column: span 3; background: #F3D3E1; color: var(--primary, #D4276C); }
+.osk-shift, .osk-backspace { grid-column: span 5; background: #F0CEDD; color: var(--primary, #D4276C); }
 .osk-shift.active { background: var(--primary, #D4276C); color: #fff; }
 .osk-shift.lock { background: var(--primary-dark, #B81F5A); color: #fff; }
 .osk-shift svg, .osk-backspace svg { pointer-events: none; }
-.osk-row-z .osk-key:not(.osk-shift):not(.osk-backspace) { grid-column: span 2; }
 
-.osk-row-ctrl { grid-template-columns: repeat(20, 1fr); gap: 5px; margin-top: 1px; }
+.osk-row-ctrl { gap: 6px; margin-top: 1px; }
 .osk-ctrl {
-  height: 44px; border: none; border-radius: 7px;
+  height: 42px; border: none; border-radius: 5px;
   font-family: inherit; font-size: 15px; font-weight: 600;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   touch-action: manipulation; padding: 0; min-width: 0;
-  box-shadow: 0 1.5px 0 rgba(184, 31, 90, 0.12);
-  transition: transform .08s, filter .08s;
+  box-shadow: 0 1px 0 rgba(120, 40, 70, 0.18);
+  transition: transform .06s, filter .08s;
 }
 .osk-ctrl:active { transform: scale(0.95); filter: brightness(0.96); }
-.osk-paste { grid-column: span 3; background: #F3D3E1; color: var(--primary, #D4276C); }
-.osk-clr   { grid-column: span 3; background: #E9C4B4; color: #7a4a30; }
-.osk-space { grid-column: span 9; background: #fff; color: #6a4a58; font-weight: 500; letter-spacing: .04em; }
-.osk-return{ grid-column: span 5; background: var(--primary, #D4276C); color: #fff; }
+.osk-paste { grid-column: span 5; background: #F0CEDD; color: var(--primary, #D4276C); }
+.osk-clr   { grid-column: span 5; background: #E9C4B4; color: #7a4a30; }
+.osk-space { grid-column: span 20; background: #fff; color: #6a4a58; font-weight: 500; letter-spacing: .04em; }
+.osk-return{ grid-column: span 10; background: var(--primary, #D4276C); color: #fff; }
 
 .osk-dismiss {
   align-self: center; margin-top: 1px;
