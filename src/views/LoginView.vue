@@ -113,7 +113,7 @@
         <!-- REGISTER -->
         <div v-else-if="view === 'register'" key="register" class="reg-shell">
           <div class="reg-header">
-            <button class="back-btn" @click="view = 'login'" aria-label="Back to sign in">
+            <button class="back-btn" @click="closeOsk(); view = 'login'" aria-label="Back to sign in">
               <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
             </button>
             <div class="card-title">Become a Partner</div>
@@ -1307,7 +1307,8 @@ input.has-toggle { padding-right: 46px; }
 .footer { text-align: center; margin-top: 20px; font-size: 11.5px; color: var(--text-muted); }
 
 /* ── Transitions ─────────────────────────────────────────────────────────── */
-.fade-enter-active, .fade-leave-active { transition: opacity 0.18s ease, transform 0.18s ease; }
+.fade-enter-active { transition: opacity 0.18s ease, transform 0.18s ease; }
+.fade-leave-active { transition: opacity 0s; }
 .fade-enter-from { opacity: 0; transform: translateY(10px); }
-.fade-leave-to   { opacity: 0; transform: translateY(-6px); }
+.fade-leave-to   { opacity: 0; }
 </style>
