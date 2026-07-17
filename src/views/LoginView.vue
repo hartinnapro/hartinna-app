@@ -348,11 +348,19 @@
 
 <script setup>
 import { ref, reactive, onMounted, onUnmounted, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, onBeforeRouteLeave } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import CustomKeyboard from '@/components/CustomKeyboard.vue'
 
 const router = useRouter()
+
+// Reset to login form before the route-leave transition plays.
+// Without this, OS back while on register/forgot_email shows those cards
+// fading out while AppNav is already visible on the incoming route.
+onBeforeRouteLeave(() => {
+  closeOsk()
+  view.value = 'login'
+})
 
 // ── Custom on-screen keyboard (prototype: Full Name field) ───────────────────
 const fullNameInput = ref(null)   // ref to the actual <input>
