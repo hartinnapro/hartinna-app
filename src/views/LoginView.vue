@@ -823,7 +823,7 @@ html.aurora-bg body { background-color: transparent; background-image: none; ani
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 24px 16px 32px;
+  padding: 24px 8px 32px;
   width: 100%;
   max-width: 480px;
   margin: 0 auto;
@@ -926,7 +926,7 @@ html.aurora-bg body { background-color: transparent; background-image: none; ani
 /* ── Card ────────────────────────────────────────────────────────────────── */
 .card-wrap {
   position: relative;
-  width: 90%;
+  width: 95%;
 }
 .card-aurora-layer {
   position: absolute;
@@ -960,6 +960,9 @@ html.aurora-bg body { background-color: transparent; background-image: none; ani
     inset  1px 0 0 rgba(255, 255, 255, 0.55),
     inset -1px 0 0 rgba(255, 255, 255, 0.55);
   padding: 30px 24px 24px;
+  /* Lock non-register cards to login form height so brand never shifts position
+     when switching between login ↔ forgot_email ↔ success views. */
+  min-height: 360px;
 }
 .card-title    { font-family: 'Playfair Display', Georgia, serif; font-size: 21px; color: var(--text); margin-bottom: 5px; }
 
