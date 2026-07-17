@@ -322,7 +322,7 @@ defineExpose({ typeChar, backspace: backspaceOnce, clear: pressClear })
   box-shadow: 0 1px 0 rgba(120, 40, 70, 0.20);
   transition: background .08s, transform .06s;
 }
-.osk-digit { font-size: 19px; font-weight: 400; color: #6a4a58; }
+.osk-digit { font-size: 21px; font-weight: 450; color: #3a2731; }
 .osk-key:active::before { background: var(--primary-light, #FCE4EF); transform: scale(0.94); }
 
 .osk-shift, .osk-backspace { grid-column: span 5; color: var(--primary, #D4276C); --cap: #F0CEDD; }
