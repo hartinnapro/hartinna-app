@@ -64,14 +64,13 @@ export function useSwipeNav() {
     if (Math.abs(dx) < Math.abs(dy) * H_RATIO) return
     if (dt > MAX_DT)                           return
 
+    // Bounded at edges: no wrap-around. Home can't swipe to Profile, and vice versa.
+    const target = dx > 0 ? idx - 1 : idx + 1
+    if (target < 0 || target >= SWIPE_TABS.length) return
+
     locked = true
-    if (dx > 0) {
-      slideDirection.value = 'slide-right'
-      router.push(SWIPE_TABS[(idx - 1 + SWIPE_TABS.length) % SWIPE_TABS.length])
-    } else {
-      slideDirection.value = 'slide-left'
-      router.push(SWIPE_TABS[(idx + 1) % SWIPE_TABS.length])
-    }
+    slideDirection.value = dx > 0 ? 'slide-right' : 'slide-left'
+    router.push(SWIPE_TABS[target])
   }
 
   function unlock() {
