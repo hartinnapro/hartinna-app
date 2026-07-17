@@ -122,9 +122,23 @@
 
           <div class="form-group">
             <label for="reg-fullname">Full Name</label>
-            <input id="reg-fullname" v-model="R.fullName" type="text" placeholder="As per IC / Passport" :class="{ err: E.fullName }" />
+            <input id="reg-fullname" ref="fullNameInput" v-model="R.fullName" type="text"
+                   inputmode="none" autocomplete="off"
+                   placeholder="As per IC / Passport" :class="{ err: E.fullName }"
+                   @focus="openOsk" />
             <div v-if="E.fullName" class="field-error">{{ E.fullName }}</div>
           </div>
+
+          <CustomKeyboard
+            :target="fullNameInput"
+            :visible="oskVisible"
+            layout="qwerty"
+            :auto-cap-words="true"
+            :maxlength="60"
+            :sound="true"
+            @update:modelValue="val => { R.fullName = val; E.fullName = '' }"
+            @enter="closeOsk"
+            @hide="closeOsk" />
 
           <div class="form-group">
             <label for="reg-username">Username</label>
@@ -324,8 +338,15 @@
 import { ref, reactive, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
+import CustomKeyboard from '@/components/CustomKeyboard.vue'
 
 const router = useRouter()
+
+// ── Custom on-screen keyboard (prototype: Full Name field) ───────────────────
+const fullNameInput = ref(null)   // ref to the actual <input>
+const oskVisible    = ref(false)  // keyboard shown while the field is active
+function openOsk() { oskVisible.value = true }
+function closeOsk() { oskVisible.value = false }
 
 const view    = ref('login')
 
