@@ -802,6 +802,12 @@ html.aurora-bg body { background-color: transparent; background-image: none; ani
 .page-register .brand-logo { width: 56px; height: 56px; }
 .page-register .brand-img { width: 118px; }
 
+/* Register: card expands to fill the space between brand and footer */
+.page-register .brand { flex-shrink: 0; }
+.page-register .footer { flex-shrink: 0; }
+.page-register .card-wrap { flex: 1 1 auto; min-height: 0; display: flex; }
+.page-register .card { display: flex; flex-direction: column; min-height: 0; width: 100%; }
+
 /* ── Shimmer aurora ──────────────────────────────────────────────────────── */
 /* Animation lives on html.aurora-bg (global style above) */
 
@@ -919,7 +925,7 @@ html.aurora-bg body { background-color: transparent; background-image: none; ani
 /* ── Register: frozen header + scrolling fields ───────────────────────────── */
 .reg-shell {
   display: flex; flex-direction: column;
-  height: 66svh;
+  flex: 1; min-height: 0;
   position: relative;
 }
 .reg-header {
