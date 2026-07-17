@@ -806,7 +806,7 @@ html.aurora-bg body { background-color: transparent; background-image: none; ani
 .page-register .brand { flex-shrink: 0; }
 .page-register .footer { flex-shrink: 0; }
 .page-register .card-wrap { flex: 1 1 auto; min-height: 0; display: flex; }
-.page-register .card { display: flex; flex-direction: column; min-height: 0; width: 100%; }
+.page-register .card { display: flex; flex-direction: column; min-height: 0; width: 100%; padding-top: 14px; }
 
 /* ── Shimmer aurora ──────────────────────────────────────────────────────── */
 /* Animation lives on html.aurora-bg (global style above) */
