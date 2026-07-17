@@ -118,7 +118,7 @@
             </button>
             <div class="card-title">Become a Partner</div>
           </div>
-          <div class="reg-scroll" ref="regScroll">
+          <div class="reg-scroll" ref="regScroll" @scroll="updateScrollCue">
 
           <div v-if="alert.msg" :class="['alert', 'alert-' + alert.type]">{{ alert.msg }}</div>
 
@@ -213,6 +213,10 @@
             <span>Already have an account? <a @click="go('login')">Sign in</a></span>
           </div>
           </div><!-- /reg-scroll -->
+
+          <button class="scroll-cue" :class="{ show: showScrollCue }" @click="scrollCueTap" aria-label="Scroll down">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
         </div>
 
         <!-- FORGOT EMAIL -->
@@ -353,20 +357,42 @@ const router = useRouter()
 const fullNameInput = ref(null)   // ref to the actual <input>
 const regScroll     = ref(null)   // the scrollable fields area
 const oskVisible    = ref(false)  // keyboard shown while the field is active
+const showScrollCue = ref(false)  // scroll-down circle button visibility
+
+// Scroll a focused field so BOTH its label and input sit above the keyboard.
+function revealField(inputEl) {
+  const sc = regScroll.value
+  if (!sc || !inputEl) return
+  const group = inputEl.closest('.form-group') || inputEl
+  const top = group.offsetTop - sc.offsetTop - 8 // 8px breathing room under header
+  sc.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+}
+
 function openOsk() {
   oskVisible.value = true
   nextTick(() => {
-    // room to scroll the lowest fields above the keyboard
-    if (regScroll.value) regScroll.value.style.paddingBottom = '320px'
-    // bring the focused field just under the frozen header
-    setTimeout(() => {
-      fullNameInput.value?.scrollIntoView({ block: 'start', behavior: 'smooth' })
-    }, 80)
+    if (regScroll.value) regScroll.value.style.paddingBottom = '64px'
+    setTimeout(() => revealField(fullNameInput.value), 80)
+    updateScrollCue()
   })
 }
 function closeOsk() {
   oskVisible.value = false
   if (regScroll.value) regScroll.value.style.paddingBottom = ''
+  updateScrollCue()
+}
+
+// Show the down-cue while content is still hidden below the fold.
+function updateScrollCue() {
+  const sc = regScroll.value
+  if (!sc) { showScrollCue.value = false; return }
+  const overflow = sc.scrollHeight - sc.clientHeight
+  showScrollCue.value = overflow > 6 && (overflow - sc.scrollTop) > 6
+}
+function scrollCueTap() {
+  const sc = regScroll.value
+  if (!sc) return
+  sc.scrollBy({ top: sc.clientHeight * 0.75, behavior: 'smooth' })
 }
 
 const view    = ref('login')
@@ -563,6 +589,7 @@ function go(to) {
   showPw.value = false
   if (to === 'forgot_email') L.email = ''
   view.value = to
+  if (to === 'register') nextTick(() => setTimeout(updateScrollCue, 50))
 }
 
 function setAlert(msg, type = 'error') {
@@ -884,6 +911,7 @@ html.aurora-bg body { background-color: transparent; background-image: none; ani
 .reg-shell {
   display: flex; flex-direction: column;
   height: 66svh;
+  position: relative;
 }
 .reg-header {
   flex-shrink: 0;
@@ -899,8 +927,36 @@ html.aurora-bg body { background-color: transparent; background-image: none; ani
   -webkit-overflow-scrolling: touch;
   padding-top: 16px;
   scroll-behavior: smooth;
+  scrollbar-width: none;           /* Firefox — hide native scrollbar */
+  -ms-overflow-style: none;
 }
+.reg-scroll::-webkit-scrollbar { width: 0; height: 0; display: none; } /* WebKit */
 .reg-toggle { margin-top: 18px; }
+
+/* Scroll-down cue — circular glass button, appears while more content is below */
+.scroll-cue {
+  position: absolute;
+  left: 50%; bottom: 6px; margin-left: -20px;
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(10px) saturate(1.4);
+  -webkit-backdrop-filter: blur(10px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 14px rgba(212, 39, 108, 0.28);
+  color: var(--primary);
+  cursor: pointer;
+  opacity: 0; pointer-events: none;
+  transform: translateY(4px);
+  transition: opacity .25s ease, transform .25s ease;
+  z-index: 5;
+}
+.scroll-cue.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.scroll-cue.show svg { animation: cue-bounce 1.4s ease-in-out infinite; }
+@keyframes cue-bounce {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(3px); }
+}
 
 .back-btn {
   display: flex;
