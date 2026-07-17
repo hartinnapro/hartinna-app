@@ -762,6 +762,17 @@ html.aurora-bg body { background-color: transparent; background-image: none; ani
   75%  { background-position: 0% 100%; }
   100% { background-position: 0% 50%; }
 }
+
+/* Brand fade-in whenever the login view is shown — masks any layout shift
+   on in-app back, OS back, and initial page load. Re-triggers automatically
+   when .page-register is removed (Vue toggles the class on view change). */
+@keyframes brand-login-enter {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page:not(.page-register) .brand {
+  animation: brand-login-enter 0.35s ease backwards;
+}
 </style>
 
 <style scoped>
