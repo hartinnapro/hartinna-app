@@ -211,12 +211,13 @@ onBeforeUnmount(() => bsUp())
                   @pointerdown="onKeyDown($event, 'letter', k)"
                   @pointerup="hideKeycap" @pointerleave="hideKeycap">{{ upperNext ? k.toUpperCase() : k }}</button>
         </div>
-        <!-- asdf row: 9 keys, inset half a key each side; edge keys claim the margin as hit area -->
+        <!-- asdf row: 9 keys, half-key margin each side via spacers -->
         <div class="osk-row">
-          <button v-for="(k, i) in ROWS[2]" :key="k" class="osk-key"
-                  :class="{ 'edge-l': i === 0, 'edge-r': i === ROWS[2].length - 1 }"
+          <span class="osk-sp-half"></span>
+          <button v-for="k in ROWS[2]" :key="k" class="osk-key"
                   @pointerdown="onKeyDown($event, 'letter', k)"
                   @pointerup="hideKeycap" @pointerleave="hideKeycap">{{ upperNext ? k.toUpperCase() : k }}</button>
+          <span class="osk-sp-half"></span>
         </div>
         <!-- shift + zxcv + backspace -->
         <div class="osk-row osk-row-z">
@@ -227,9 +228,11 @@ onBeforeUnmount(() => bsUp())
               <path d="M12 4l8 8h-5v8h-6v-8H4z" :fill="(forceUpper || shift) ? 'currentColor' : 'none'"/>
             </svg>
           </button>
+          <span class="osk-sp-gap"></span>
           <button v-for="k in ROWS[3]" :key="k" class="osk-key"
                   @pointerdown="onKeyDown($event, 'letter', k)"
                   @pointerup="hideKeycap" @pointerleave="hideKeycap">{{ upperNext ? k.toUpperCase() : k }}</button>
+          <span class="osk-sp-gap"></span>
           <button class="osk-key osk-backspace"
                   @pointerdown="bsDown" @pointerup="bsUp" @pointerleave="bsUp" aria-label="Backspace">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">
@@ -288,6 +291,8 @@ onBeforeUnmount(() => bsUp())
    The visible cap is drawn by ::before, inset by half the gap on every side —
    so the space between keys splits 50/50 and stays fully tappable (native iOS). */
 .osk-row { display: grid; grid-template-columns: repeat(40, 1fr); gap: 0; }
+.osk-sp-half { grid-column: span 2; }
+.osk-sp-gap  { grid-column: span 1; }
 .osk-key {
   grid-column: span 4;
   position: relative; z-index: 0;
@@ -311,16 +316,7 @@ onBeforeUnmount(() => bsUp())
 .osk-digit { font-size: 19px; font-weight: 400; color: #6a4a58; }
 .osk-key:active::before { background: var(--primary-light, #FCE4EF); transform: scale(0.94); }
 
-/* home-row edge keys: absorb the half-key margin as hit area, cap stays visually inset */
-.osk-key.edge-l { grid-column: span 6; }
-.osk-key.edge-l::before { inset: 3px 3px 3px calc(2 / 6 * 100%); }
-.osk-key.edge-r { grid-column: span 6; }
-.osk-key.edge-r::before { inset: 3px calc(2 / 6 * 100%) 3px 3px; }
-
-/* shift/backspace span 6 (1.25 key cap + the adjacent gap as hit area); cap kept 1.25-key wide */
-.osk-shift, .osk-backspace { grid-column: span 6; color: var(--primary, #D4276C); --cap: #F0CEDD; }
-.osk-shift::before { inset: 3px calc(1 / 6 * 100%) 3px 3px; }
-.osk-backspace::before { inset: 3px 3px 3px calc(1 / 6 * 100%); }
+.osk-shift, .osk-backspace { grid-column: span 5; color: var(--primary, #D4276C); --cap: #F0CEDD; }
 .osk-shift.active { color: #fff; --cap: var(--primary, #D4276C); }
 .osk-shift.lock { color: #fff; --cap: var(--primary-dark, #B81F5A); }
 .osk-shift svg, .osk-backspace svg { pointer-events: none; }
