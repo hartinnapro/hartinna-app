@@ -14,7 +14,6 @@ export default defineConfig({
       workbox: {
         navigateFallback: '/index.html',
         navigateFallbackAllowlist: [/^\/(?!api)/],
-        skipWaiting: true,
         clientsClaim: true
       },
       manifest: {
