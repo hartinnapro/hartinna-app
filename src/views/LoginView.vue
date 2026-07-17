@@ -111,12 +111,14 @@
         </form>
 
         <!-- REGISTER -->
-        <div v-else-if="view === 'register'" key="register">
-          <button class="back-btn" @click="view = 'login'" aria-label="Back to sign in">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
-          </button>
-          <div class="card-title">Become a Partner</div>
-          <div class="card-subtitle">Create your Hartinna Partner account</div>
+        <div v-else-if="view === 'register'" key="register" class="reg-shell">
+          <div class="reg-header">
+            <button class="back-btn" @click="view = 'login'" aria-label="Back to sign in">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+            </button>
+            <div class="card-title">Become a Partner</div>
+          </div>
+          <div class="reg-scroll" ref="regScroll">
 
           <div v-if="alert.msg" :class="['alert', 'alert-' + alert.type]">{{ alert.msg }}</div>
 
@@ -206,6 +208,11 @@
             <span v-if="loading" class="spinner"></span>
             {{ loading ? 'Creating account…' : 'Create Account' }}
           </button>
+
+          <div class="toggle-link reg-toggle">
+            <span>Already have an account? <a @click="go('login')">Sign in</a></span>
+          </div>
+          </div><!-- /reg-scroll -->
         </div>
 
         <!-- FORGOT EMAIL -->
@@ -254,7 +261,7 @@
 
       </Transition>
 
-      <div class="toggle-link" v-if="view !== 'success'">
+      <div class="toggle-link" v-if="view === 'login' || view === 'forgot_email'">
         <span v-if="view === 'login'">
           New partner? <a @click="go('register')">Register here</a>
           <span class="toggle-sep">·</span>
@@ -344,9 +351,23 @@ const router = useRouter()
 
 // ── Custom on-screen keyboard (prototype: Full Name field) ───────────────────
 const fullNameInput = ref(null)   // ref to the actual <input>
+const regScroll     = ref(null)   // the scrollable fields area
 const oskVisible    = ref(false)  // keyboard shown while the field is active
-function openOsk() { oskVisible.value = true }
-function closeOsk() { oskVisible.value = false }
+function openOsk() {
+  oskVisible.value = true
+  nextTick(() => {
+    // room to scroll the lowest fields above the keyboard
+    if (regScroll.value) regScroll.value.style.paddingBottom = '320px'
+    // bring the focused field just under the frozen header
+    setTimeout(() => {
+      fullNameInput.value?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+    }, 80)
+  })
+}
+function closeOsk() {
+  oskVisible.value = false
+  if (regScroll.value) regScroll.value.style.paddingBottom = ''
+}
 
 const view    = ref('login')
 
@@ -749,19 +770,20 @@ html.aurora-bg body { background-color: transparent; background-image: none; ani
 
 /* ── Brand ───────────────────────────────────────────────────────────────── */
 .brand {
-  display: flex; flex-direction: column; align-items: center;
-  margin-bottom: 24px;
+  display: flex; flex-direction: row; align-items: center; justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 /* Logo icon — metallic steel lighting via filter animation */
 .brand-mark {
-  width: 108px; height: 108px;
+  width: 56px; height: 56px;
   display: flex; align-items: center; justify-content: center;
-  margin-bottom: 12px;
+  margin-bottom: 0;
   position: relative;
 }
 .brand-logo {
-  width: 108px; height: 108px; object-fit: contain;
+  width: 56px; height: 56px; object-fit: contain;
   animation: steel-light 6s ease-in-out infinite;
 }
 @keyframes steel-light {
@@ -806,7 +828,7 @@ html.aurora-bg body { background-color: transparent; background-image: none; ani
   45%, 100% { left: 200%; }
 }
 .brand-img {
-  width: 168px;
+  width: 118px;
   /* Invert the black bg → white, then shift hue to pink family */
   filter:
     invert(1)
@@ -857,6 +879,28 @@ html.aurora-bg body { background-color: transparent; background-image: none; ani
   padding: 30px 24px 24px;
 }
 .card-title    { font-family: 'Playfair Display', Georgia, serif; font-size: 21px; color: var(--text); margin-bottom: 5px; }
+
+/* ── Register: frozen header + scrolling fields ───────────────────────────── */
+.reg-shell {
+  display: flex; flex-direction: column;
+  height: 66svh;
+}
+.reg-header {
+  flex-shrink: 0;
+  display: flex; align-items: center; gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(212, 39, 108, 0.10);
+}
+.reg-header .back-btn { margin-bottom: 0; flex-shrink: 0; }
+.reg-header .card-title { margin-bottom: 0; }
+.reg-scroll {
+  flex: 1; min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-top: 16px;
+  scroll-behavior: smooth;
+}
+.reg-toggle { margin-top: 18px; }
 
 .back-btn {
   display: flex;
