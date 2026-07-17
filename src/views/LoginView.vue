@@ -796,27 +796,30 @@ html.aurora-bg body { background-color: transparent; background-image: none; ani
   justify-content: flex-start;
   padding-top: 16px;
 }
-.page-register .brand { margin-bottom: 16px; }
+/* Register only: compact brand row (logo left, wordmark right) */
+.page-register .brand { flex-direction: row; gap: 12px; margin-bottom: 16px; }
+.page-register .brand-mark { width: 56px; height: 56px; margin-bottom: 0; }
+.page-register .brand-logo { width: 56px; height: 56px; }
+.page-register .brand-img { width: 118px; }
 
 /* ── Shimmer aurora ──────────────────────────────────────────────────────── */
 /* Animation lives on html.aurora-bg (global style above) */
 
 /* ── Brand ───────────────────────────────────────────────────────────────── */
 .brand {
-  display: flex; flex-direction: row; align-items: center; justify-content: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  display: flex; flex-direction: column; align-items: center;
+  margin-bottom: 24px;
 }
 
 /* Logo icon — metallic steel lighting via filter animation */
 .brand-mark {
-  width: 56px; height: 56px;
+  width: 108px; height: 108px;
   display: flex; align-items: center; justify-content: center;
-  margin-bottom: 0;
+  margin-bottom: 12px;
   position: relative;
 }
 .brand-logo {
-  width: 56px; height: 56px; object-fit: contain;
+  width: 108px; height: 108px; object-fit: contain;
   animation: steel-light 6s ease-in-out infinite;
 }
 @keyframes steel-light {
@@ -861,7 +864,7 @@ html.aurora-bg body { background-color: transparent; background-image: none; ani
   45%, 100% { left: 200%; }
 }
 .brand-img {
-  width: 118px;
+  width: 168px;
   /* Invert the black bg → white, then shift hue to pink family */
   filter:
     invert(1)
