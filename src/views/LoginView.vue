@@ -123,9 +123,9 @@
           <div class="form-group">
             <label for="reg-fullname">Full Name</label>
             <input id="reg-fullname" ref="fullNameInput" v-model="R.fullName" type="text"
-                   inputmode="none" autocomplete="off"
+                   inputmode="none" autocomplete="off" style="text-transform: uppercase"
                    placeholder="As per IC / Passport" :class="{ err: E.fullName }"
-                   @focus="openOsk" />
+                   @focus="openOsk" @input="R.fullName = R.fullName.toUpperCase()" />
             <div v-if="E.fullName" class="field-error">{{ E.fullName }}</div>
           </div>
 
@@ -133,7 +133,7 @@
             :target="fullNameInput"
             :visible="oskVisible"
             layout="qwerty"
-            :auto-cap-words="true"
+            :force-upper="true"
             :maxlength="60"
             :sound="true"
             @update:modelValue="val => { R.fullName = val; E.fullName = '' }"

@@ -22,6 +22,7 @@ const props = defineProps({
   visible: { type: Boolean, default: false },
   layout: { type: String, default: 'qwerty' },
   autoCapWords: { type: Boolean, default: true },
+  forceUpper: { type: Boolean, default: false }, // ALL-CAPS lock (e.g. Full Name / IC name)
   maxlength: { type: Number, default: 0 }, // 0 = no limit
   sound: { type: Boolean, default: true }
 })
@@ -53,6 +54,7 @@ function autoCapAtCaret() {
 // Whether the NEXT letter typed will be uppercase (drives key display + insertion)
 const upperNext = computed(() => {
   void tick.value // reactive dependency so keys re-render as caret/value change
+  if (props.forceUpper) return true // all-caps lock, never lowercase
   if (shift.value === 'lock') return true
   const auto = autoCapAtCaret()
   return shift.value === true ? !auto : auto
@@ -63,6 +65,7 @@ const tick = ref(0)
 function bump() { tick.value++ }
 
 function onShift() {
+  if (props.forceUpper) return // locked to caps — shift disabled
   const now = Date.now()
   if (shift.value === 'lock') { shift.value = false }
   else if (now - lastShiftTap < 320) { shift.value = 'lock' } // double-tap → caps lock
@@ -208,18 +211,21 @@ onBeforeUnmount(() => bsUp())
                   @pointerdown="onKeyDown($event, 'letter', k)"
                   @pointerup="hideKeycap" @pointerleave="hideKeycap">{{ upperNext ? k.toUpperCase() : k }}</button>
         </div>
-        <!-- asdf row (indented) -->
-        <div class="osk-row osk-row-home">
+        <!-- asdf row: 9 keys, inset exactly half a key each side (native iOS) -->
+        <div class="osk-row">
+          <span class="osk-sp1"></span>
           <button v-for="k in ROWS[2]" :key="k" class="osk-key"
                   @pointerdown="onKeyDown($event, 'letter', k)"
                   @pointerup="hideKeycap" @pointerleave="hideKeycap">{{ upperNext ? k.toUpperCase() : k }}</button>
+          <span class="osk-sp1"></span>
         </div>
         <!-- shift + zxcv + backspace -->
         <div class="osk-row osk-row-z">
-          <button class="osk-key osk-shift" :class="{ active: shift === true, lock: shift === 'lock' }"
+          <button class="osk-key osk-shift"
+                  :class="{ active: forceUpper || shift === true, lock: forceUpper || shift === 'lock' }"
                   @pointerdown.prevent="onShift" aria-label="Shift">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 4l8 8h-5v8h-6v-8H4z" :fill="shift ? 'currentColor' : 'none'"/>
+              <path d="M12 4l8 8h-5v8h-6v-8H4z" :fill="(forceUpper || shift) ? 'currentColor' : 'none'"/>
             </svg>
           </button>
           <button v-for="k in ROWS[3]" :key="k" class="osk-key"
@@ -276,7 +282,7 @@ onBeforeUnmount(() => bsUp())
   -webkit-user-select: none; user-select: none;
 }
 .osk-row { display: grid; grid-template-columns: repeat(20, 1fr); gap: 5px; }
-.osk-row-home { padding: 0 calc(5% + 2px); }
+.osk-sp1 { grid-column: span 1; }
 .osk-key {
   grid-column: span 2;
   height: 44px;
