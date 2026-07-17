@@ -44,6 +44,8 @@
             <div class="stat-item"><div class="stat-value">{{ stats.completed }}</div><div class="stat-label">Completed</div></div>
             <div class="stat-item"><div class="stat-value">MYR {{ stats.spent }}</div><div class="stat-label">Total Spent</div></div>
           </div>
+
+          <div class="build-stamp">{{ buildStamp }}</div>
         </div>
 
         <!-- Account info -->
@@ -181,6 +183,7 @@ const pwLoading   = ref(false)
 const pw          = reactive({ new:'', confirm:'' })
 const pwAlert     = reactive({ type:'error', msg:'' })
 const stats       = reactive({ total:0, completed:0, spent:'0' })
+const buildStamp  = __BUILD_STAMP__
 
 const LEVEL_LABELS = { store_manager:'Store Manager', director:'Director', ceo:'CEO', branch:'Branch', exec_shareholder:'Exec. Shareholder' }
 const levelLabel = computed(() => LEVEL_LABELS[member.level] || member.level)
@@ -288,6 +291,7 @@ onMounted(async () => {
 .stat-item { background:rgba(255,255,255,0.1);padding:10px 8px;text-align:center; }
 .stat-value { font-size:18px;font-weight:700;color:white; }
 .stat-label { font-size:10px;color:rgba(255,255,255,0.7);margin-top:2px; }
+.build-stamp { margin-top:10px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.02em;color:rgba(255,255,255,0.55);text-align:center;position:relative;z-index:1;user-select:text; }
 
 .section { padding:16px 16px 0; }
 .section-label { font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px; }

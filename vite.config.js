@@ -3,7 +3,17 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { VitePWA } from 'vite-plugin-pwa'
 
+// Build stamp baked in at build time, format: YYYYDDMM | HH:MM:SS
+const BUILD_STAMP = (() => {
+  const d = new Date()
+  const p = n => String(n).padStart(2, '0')
+  return `${d.getFullYear()}${p(d.getDate())}${p(d.getMonth() + 1)} | ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`
+})()
+
 export default defineConfig({
+  define: {
+    __BUILD_STAMP__: JSON.stringify(BUILD_STAMP)
+  },
   plugins: [
     vue(),
     VitePWA({
