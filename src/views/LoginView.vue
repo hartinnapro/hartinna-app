@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <div class="page" :class="{ 'page-register': view === 'register' }">
 
     <!-- Brand -->
     <div class="brand">
@@ -789,8 +789,14 @@ html.aurora-bg body { background-color: transparent; background-image: none; ani
   width: 100%;
   max-width: 480px;
   margin: 0 auto;
-  box-sizing: border-box;
+  box-sizing: border-box;}
+
+/* Register: top-align so the gap above the brand equals the brand→card gap (16px) */
+.page-register {
+  justify-content: flex-start;
+  padding-top: 16px;
 }
+.page-register .brand { margin-bottom: 16px; }
 
 /* ── Shimmer aurora ──────────────────────────────────────────────────────── */
 /* Animation lives on html.aurora-bg (global style above) */
