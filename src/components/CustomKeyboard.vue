@@ -193,6 +193,15 @@ function onKeyDown(e, kind, k) {
 watch(() => props.target && props.target.value, () => bump())
 onMounted(() => bump())
 onBeforeUnmount(() => bsUp())
+
+/* ---- physical-keyboard bridge (input is readonly to kill native soft kb) ---- */
+// Insert a single physical-keyboard character, honouring force/auto-cap rules.
+function typeChar(ch) {
+  const out = props.forceUpper ? ch.toUpperCase() : (upperNext.value ? ch.toUpperCase() : ch)
+  insertText(out)
+  if (shift.value === true) shift.value = false
+}
+defineExpose({ typeChar, backspace: backspaceOnce, clear: pressClear })
 </script>
 
 <template>

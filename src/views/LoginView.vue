@@ -125,13 +125,14 @@
           <div class="form-group">
             <label for="reg-fullname">Full Name</label>
             <input id="reg-fullname" ref="fullNameInput" v-model="R.fullName" type="text"
-                   inputmode="none" autocomplete="off" style="text-transform: uppercase"
+                   inputmode="none" autocomplete="off" readonly style="text-transform: uppercase"
                    placeholder="As per IC / Passport" :class="{ err: E.fullName }"
-                   @focus="openOsk" @input="R.fullName = R.fullName.toUpperCase()" />
+                   @focus="openOsk" @click="openOsk" @keydown="onFullNameKeydown" />
             <div v-if="E.fullName" class="field-error">{{ E.fullName }}</div>
           </div>
 
           <CustomKeyboard
+            ref="fullNameKb"
             :target="fullNameInput"
             :visible="oskVisible"
             layout="qwerty"
@@ -355,9 +356,21 @@ const router = useRouter()
 
 // ── Custom on-screen keyboard (prototype: Full Name field) ───────────────────
 const fullNameInput = ref(null)   // ref to the actual <input>
+const fullNameKb    = ref(null)   // ref to the CustomKeyboard component
 const regScroll     = ref(null)   // the scrollable fields area
 const oskVisible    = ref(false)  // keyboard shown while the field is active
 const showScrollCue = ref(false)  // scroll-down circle button visibility
+
+// Physical keyboard support. The input is readonly (to suppress the native soft
+// keyboard on every platform), so native typing is blocked — we route hardware
+// key presses in manually. Copy/paste/select and navigation keys pass through.
+function onFullNameKeydown(e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) return
+  if (e.key === 'Backspace') { e.preventDefault(); fullNameKb.value?.backspace() }
+  else if (e.key === 'Enter') { e.preventDefault(); closeOsk() }
+  else if (e.key.length === 1) { e.preventDefault(); fullNameKb.value?.typeChar(e.key) }
+  // arrows / Home / End / Tab: let the readonly input handle caret natively
+}
 
 // Scroll a focused field so BOTH its label and input sit above the keyboard.
 function revealField(inputEl) {
