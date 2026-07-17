@@ -795,6 +795,9 @@ html.aurora-bg body { background-color: transparent; background-image: none; ani
 .page-register {
   justify-content: flex-start;
   padding-top: 16px;
+  height: 100svh;        /* lock to viewport — only the fields area scrolls */
+  min-height: 0;
+  overflow: hidden;      /* brand row + card header stay frozen */
 }
 /* Register only: compact brand row (logo left, wordmark right) */
 .page-register .brand { flex-direction: row; gap: 12px; margin-bottom: 16px; }
