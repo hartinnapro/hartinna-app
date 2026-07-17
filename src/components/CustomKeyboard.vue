@@ -211,13 +211,12 @@ onBeforeUnmount(() => bsUp())
                   @pointerdown="onKeyDown($event, 'letter', k)"
                   @pointerup="hideKeycap" @pointerleave="hideKeycap">{{ upperNext ? k.toUpperCase() : k }}</button>
         </div>
-        <!-- asdf row: 9 keys, inset exactly half a key each side (native iOS) -->
+        <!-- asdf row: 9 keys, inset half a key each side; edge keys claim the margin as hit area -->
         <div class="osk-row">
-          <span class="osk-sp-half"></span>
-          <button v-for="k in ROWS[2]" :key="k" class="osk-key"
+          <button v-for="(k, i) in ROWS[2]" :key="k" class="osk-key"
+                  :class="{ 'edge-l': i === 0, 'edge-r': i === ROWS[2].length - 1 }"
                   @pointerdown="onKeyDown($event, 'letter', k)"
                   @pointerup="hideKeycap" @pointerleave="hideKeycap">{{ upperNext ? k.toUpperCase() : k }}</button>
-          <span class="osk-sp-half"></span>
         </div>
         <!-- shift + zxcv + backspace -->
         <div class="osk-row osk-row-z">
@@ -228,11 +227,9 @@ onBeforeUnmount(() => bsUp())
               <path d="M12 4l8 8h-5v8h-6v-8H4z" :fill="(forceUpper || shift) ? 'currentColor' : 'none'"/>
             </svg>
           </button>
-          <span class="osk-sp-gap"></span>
           <button v-for="k in ROWS[3]" :key="k" class="osk-key"
                   @pointerdown="onKeyDown($event, 'letter', k)"
                   @pointerup="hideKeycap" @pointerleave="hideKeycap">{{ upperNext ? k.toUpperCase() : k }}</button>
-          <span class="osk-sp-gap"></span>
           <button class="osk-key osk-backspace"
                   @pointerdown="bsDown" @pointerup="bsUp" @pointerleave="bsUp" aria-label="Backspace">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">
@@ -277,9 +274,9 @@ onBeforeUnmount(() => bsUp())
   background: linear-gradient(180deg, #FCE9F1 0%, #F9DCEA 100%);
   border-top: 1px solid rgba(212, 39, 108, 0.18);
   box-shadow: 0 -4px 20px rgba(184, 31, 90, 0.16);
-  padding: 8px 6px calc(14px + env(safe-area-inset-bottom, 0px));
+  padding: 6px 3px calc(12px + env(safe-area-inset-bottom, 0px));
   z-index: 4000;
-  display: flex; flex-direction: column; gap: 7px;
+  display: flex; flex-direction: column; gap: 0; /* rows touch — vertical gap lives inside keys */
   box-sizing: border-box;
   -webkit-user-select: none; user-select: none;
 }
@@ -287,43 +284,68 @@ onBeforeUnmount(() => bsUp())
 .osk-row { display: grid; grid-template-columns: repeat(40, 1fr); gap: 6px; }
 .osk-sp-half { grid-column: span 2; }
 .osk-sp-gap  { grid-column: span 1; }
+/* 40-col grid, NO gap: each key fills its cell edge-to-edge as the hit target.
+   The visible cap is drawn by ::before, inset by half the gap on every side —
+   so the space between keys splits 50/50 and stays fully tappable (native iOS). */
+.osk-row { display: grid; grid-template-columns: repeat(40, 1fr); gap: 0; }
 .osk-key {
   grid-column: span 4;
-  height: 42px;
-  background: #fff;
-  border: 1px solid rgba(212, 39, 108, 0.08);
-  border-radius: 5px;
+  position: relative; z-index: 0;
+  height: 48px; /* 42 cap + 3 top + 3 bottom → the tappable gap */
+  background: transparent; border: none;
   color: #3a2731;
   font-size: 21px; font-weight: 450;
   font-family: inherit;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 1px 0 rgba(120, 40, 70, 0.20);
   cursor: pointer; padding: 0; min-width: 0;
   touch-action: manipulation;
+}
+.osk-key::before {
+  content: ''; position: absolute; inset: 3px; z-index: -1;
+  background: var(--cap, #fff);
+  border: 1px solid rgba(212, 39, 108, 0.08);
+  border-radius: 5px;
+  box-shadow: 0 1px 0 rgba(120, 40, 70, 0.20);
   transition: background .08s, transform .06s;
 }
 .osk-digit { font-size: 19px; font-weight: 400; color: #6a4a58; }
-.osk-key:active { background: var(--primary-light, #FCE4EF); transform: scale(0.94); }
+.osk-key:active::before { background: var(--primary-light, #FCE4EF); transform: scale(0.94); }
 
-.osk-shift, .osk-backspace { grid-column: span 5; background: #F0CEDD; color: var(--primary, #D4276C); }
-.osk-shift.active { background: var(--primary, #D4276C); color: #fff; }
-.osk-shift.lock { background: var(--primary-dark, #B81F5A); color: #fff; }
+/* home-row edge keys: absorb the half-key margin as hit area, cap stays visually inset */
+.osk-key.edge-l { grid-column: span 6; }
+.osk-key.edge-l::before { inset: 3px 3px 3px calc(2 / 6 * 100%); }
+.osk-key.edge-r { grid-column: span 6; }
+.osk-key.edge-r::before { inset: 3px calc(2 / 6 * 100%) 3px 3px; }
+
+/* shift/backspace span 6 (1.25 key cap + the adjacent gap as hit area); cap kept 1.25-key wide */
+.osk-shift, .osk-backspace { grid-column: span 6; color: var(--primary, #D4276C); --cap: #F0CEDD; }
+.osk-shift::before { inset: 3px calc(1 / 6 * 100%) 3px 3px; }
+.osk-backspace::before { inset: 3px 3px 3px calc(1 / 6 * 100%); }
+.osk-shift.active { color: #fff; --cap: var(--primary, #D4276C); }
+.osk-shift.lock { color: #fff; --cap: var(--primary-dark, #B81F5A); }
 .osk-shift svg, .osk-backspace svg { pointer-events: none; }
 
-.osk-row-ctrl { gap: 6px; margin-top: 1px; }
+.osk-row-ctrl { margin-top: 0; }
 .osk-ctrl {
-  height: 42px; border: none; border-radius: 5px;
+  grid-column: span 4;
+  position: relative; z-index: 0;
+  height: 48px; border: none; background: transparent;
   font-family: inherit; font-size: 15px; font-weight: 600;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   touch-action: manipulation; padding: 0; min-width: 0;
+}
+.osk-ctrl::before {
+  content: ''; position: absolute; inset: 3px; z-index: -1;
+  background: var(--cap, #fff);
+  border-radius: 5px;
   box-shadow: 0 1px 0 rgba(120, 40, 70, 0.18);
   transition: transform .06s, filter .08s;
 }
-.osk-ctrl:active { transform: scale(0.95); filter: brightness(0.96); }
-.osk-paste { grid-column: span 5; background: #F0CEDD; color: var(--primary, #D4276C); }
-.osk-clr   { grid-column: span 5; background: #E9C4B4; color: #7a4a30; }
-.osk-space { grid-column: span 20; background: #fff; color: #6a4a58; font-weight: 500; letter-spacing: .04em; }
-.osk-return{ grid-column: span 10; background: var(--primary, #D4276C); color: #fff; }
+.osk-ctrl:active::before { transform: scale(0.95); filter: brightness(0.96); }
+.osk-paste { grid-column: span 5; color: var(--primary, #D4276C); --cap: #F0CEDD; }
+.osk-clr   { grid-column: span 5; color: #7a4a30; --cap: #E9C4B4; }
+.osk-space { grid-column: span 20; color: #6a4a58; font-weight: 500; letter-spacing: .04em; --cap: #fff; }
+.osk-return{ grid-column: span 10; color: #fff; --cap: var(--primary, #D4276C); }
 
 .osk-dismiss {
   align-self: center; margin-top: 1px;
