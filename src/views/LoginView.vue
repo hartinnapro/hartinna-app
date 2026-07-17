@@ -372,13 +372,19 @@ function onFullNameKeydown(e) {
   // arrows / Home / End / Tab: let the readonly input handle caret natively
 }
 
-// Scroll a focused field so BOTH its label and input sit above the keyboard.
+// Scroll a focused field so BOTH its label and input sit above the keyboard —
+// but only if it isn't already comfortably in view, to avoid a needless jump.
 function revealField(inputEl) {
   const sc = regScroll.value
   if (!sc || !inputEl) return
   const group = inputEl.closest('.form-group') || inputEl
-  const top = group.offsetTop - sc.offsetTop - 8 // 8px breathing room under header
-  sc.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+  const scRect = sc.getBoundingClientRect()
+  const gRect = group.getBoundingClientRect()
+  const currentTop = gRect.top - scRect.top // field's distance from the scroll viewport top
+  // Already sitting in the upper half and fully below the top edge → leave it.
+  if (currentTop >= 0 && currentTop <= sc.clientHeight * 0.45) return
+  const target = sc.scrollTop + currentTop - 12
+  sc.scrollTo({ top: Math.max(0, target), behavior: 'smooth' })
 }
 
 function openOsk() {
